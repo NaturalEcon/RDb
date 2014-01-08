@@ -4,11 +4,18 @@ Created on Tue Jan  7 12:55:59 2014
 
 @author: acumen
 """
+# For descriptions of most of the sets here, see the following mathematical model
+# definition: http://naturalecon.wordpress.com/glossary/
+# Note that there are some differences, such as the lack of a 'Component' class
+# in this model, and the addition of several survey value types.
 rclasses = (
     ('R','Resource'),('M','Material'),('P','Product'),('S','Service'),('D','Data')
 )
-
+# A "forward" dependency for resource R is a resource which depends on R.
+# A "backward" dependency for resource R is a resource on which R depends.
+# An "inter" dependency is either a co-product of R, or a member of a renewable cycle
 dtypes = (('f','Forward'),('b','Backward'),('i','Inter'))
+# Info types are types of values derived from or describing a value type.
 infotypes = ( 
     ('u','Mean'),    
     ('m','Median'),
@@ -27,218 +34,7 @@ infotypes = (
     ('*','Optimal'),
     ('x','Safety'),
 )
-valuetypes = (
-    ('Mass', (
-        ('K','Known'),
-        ('S','In Reserve'),
-        ('E','Exploited'),
-        ('D','Demanded'),
-        )
-    ),
-    ('Rate', (
-        ('dK','Discovery Rate'),
-        ('dS','Reserve Rate'),
-        ('dE','Exploitation Rate'),
-        ('dD','Rate of Change in Demand'),
-        )
-    ),
-    ('Energy', (
-        ('EE','Embodied Energy'),
-        ('PE','Process Energy'),
-        ('EX','Exergy'),
-        ('EM','Emergy'),
-        )
-    ),
-    ('Other', (
-        ('%Y','Percent Yield'),
-        )
-    ),
-)
-ptypes = (
-    ('Mass', (
-        ('Unary', (
-            ('mco','Concentration'),
-            ('mdi','Dispersion'),
-            ('mxp','Transport'),
-            ('mre','Reduction'),
-            ('mac','Accretion'),
-            ),
-        ),
-        ('One-to-One', (
-            ('mmi','Milling'),
-            ('mgr','Grinding'),
-            ('mcu','Cutting'),
-            ('mbe','Bending'),
-            ('mfo','Forming'),        
-            ),        
-        ),
-        ('Many-to-one', (
-            ('mag','Aggregation'),
-            ('msm','Smelting'),        
-            ('mds','Dissolution'),
-            ('mas','Assembling'),
-            ('mal','Alloying'),
-            ),
-        ),
-        ('One-to-many', (
-            ('mus','Disassembling'),
-            ),        
-        ),
-        ('Recursive', (
-            ('mrp','Repairing'),
-            ),
-        ),
-        ('Many-to-many', (
-            )
-        ),
-        ('Multiple', (
-            ('mrc','Recycling'),
-            ('mrx','Reaction'),
-            ),
-        ),
-        )
-    ),
-    ('Energy', 
-        ('General', (    
-            ('egc','Conversion'),
-            ('egs','Storage'),
-            ('ego','Concentration'),
-            ('ege','Entropic'),
-            ('egf','Flow'),
-            )
-        ),
-        ('Electrical', (
-            ('eet','Transmission'),
-            )
-        )
-    ),
-    ('Time', (
-        
-        )
-    ),
-    ('Actor',(
-        ('asc','State Change'),
-        )
-    ),
-)
-argtypes = (('I','Input'),('O','Output'))
-ctypes = (
-    ('J','Journal article'),('R','Report'),('P','Personal communication'),
-    ('B','Book'),('M','Memo')
-)
-class NEResource(models.Model):
-    ##########################
-    # ID namespace:
-    # 0:       Time
-    # 1-118:   Elements by atomic number
-    # 119:     Energy
-    # 120-256: Top 136 most abundant materials
-    # ID is a 6-character hex code, giving the possibility for up to 
-    # 16,777,216 different resources in the database.
-    # Size of fully-populated NEResource table: 432MiB
-    ##########################
-    # NEResource names:
-    # Please try to stay within 20 characters.  If the name is longer, it will
-    # be replaced with a longname ID, which will point to a row in a table of 
-    # long names.  This is done to speed up searching and reduce the size of
-    # this required table.
-    ##########################
-    name = models.CharField(max_length=20)
-    ##########################
-    # R Classes:
-    # R: Resource
-    # M: Material
-    # P: Product
-    # S: Service
-    # D: Data
-    ##########################
-    rclass = models.CharField(max_length=1,choices=rclasses)
-    
-    
-class Dependency(models.Model):
-    resource = models.ForeignKey(NEResource)
-    dependency = models.ForeignKey(NEResource)
-    dtype = models.CharField(max_length=1,choices=dtypes)
-    dependency_mult = models.FloatField()
-    
-    def __repr__(self):
-        return "%5.2f x %s" % (self.dependency_mult, self.dependency)
-        
-class NEMaterialClass(models.Model):
-    classname = models.CharField(max_length=50)
-    
-    def __repr__(self):
-        return "Material class: %s" % (self.classname)
-        
-        
-class NEMaterial(NEResource):
-    # ID is a 6-character hex code
-    # The materials address space could be broken down further using material classes.
-    # e.g. Polymer, Structural, Refractory, Conductive.
-    # This could also be automatically defined using extended property selection.
-    __addressspace__ = (120,524288)
-    mclass = models.ForeignKey(NEMaterialClass)
-        
-    def __repr__(self):
-        return "Material %i, type %i" % (self.id,self.mclass)
-
-# NE Process represents an industrial process or (limited scale) natural process.
-class NEProcess(models.Model):
-    pname = models.CharField(max_length=30)
-    ptype = models.CharField(max_length=1,choices=ptypes)
-    inputs = []
-    outputs = []            
-
-    def addNewIO(self,v_id=None,v_weight=None,v_type=None):
-        if v_id == None:
-            raise ValueError("You must specify a resource.")
-        if v_weight == None:
-            raise ValueError("You must specify a weight.")
-        if v_type == 'I':
-            self.inputs += NEProcessIO(v_id=v_id,v_weight=v_weight,v_type='I')
-        elif v_type == 'O':
-            self.output += NEProcessIO(v_id=v_id,v_weight=v_weight,v_type='O')
-    
-    def __repr__(self):
-        return "%s (#%s)\n Inputs: %s \n Outputs: %s" % (self.pname,self.pid,self.inputs,self.outputs)
-            
-class NEProcessIO(models.Model):
-    __tablename__ = 'processio'
-    pid = models.ForeignKey(NEProcess)
-    argid = models.ForeignKey(NEResource)
-    argweight = models.FloatField()    
-    argtype = models.CharField(max_length=1,choices=argtypes)
-
-#NE Citation is a simple research citation class until I implement Zotero support.
-# Because it is not intended to be in the project long-term, it will be limited to only
-# a few types.        
-class NECitation(models.Model):
-    title = models.CharField(max_length=100)
-    author = models.CharField(max_length=50,empty=True)
-    date = models.DateField(empty=True)
-    doi = models.CharField(max_length=30,empty=True)
-    isbn = models.CharField(max_length=13,empty=True)
-    ctype = models.CharField(max_length=1,choices=ctypes)
-    
-    def __repr__(self):
-        output = ""
-        if self.title != None: output += self.title + ". "
-        if self.author != None: 
-            output += self.author + " "
-        if self.date != None: output += self.date.strftime("%Y") + " "
-        if self.doi != None: output += self.doi + " "
-        return output
-        
-        
-# NESurveyValue is intended to represent a single data point.
-class NESurveyValue(models.Model):
-    # Resource or process ID
-    resource = models.ForeignKey(NEResource,empty=True)
-    process = models.ForeignKey(NEProcess,empty=True)
-    actor = models.ForeignKey('NEActor',empty=True)
-    # UNIX time of observation
-    date = models.DateField()
-    # Valuetype can be one of the following:
+# Valuetype can be one of the following:
     #########################################
     # Mass-based
     #  K,S,E,D: Resource mass quantity, in kg
@@ -266,43 +62,362 @@ class NESurveyValue(models.Model):
     #       EX: exergy value
     #       EM: emergy value
     #########################################
+valuetypes = (
+    ('Mass', (
+        ('K','Known'),
+        ('S','In Reserve'),
+        ('E','Exploited'),
+        ('D','Demanded'),
+        )
+    ),
+    ('Rate', (
+        ('dK','Discovery Rate'),
+        ('dS','Reserve Rate'),
+        ('dE','Exploitation Rate'),
+        ('dD','Rate of Change in Demand'),
+        )
+    ),
+    ('Energy', (
+        ('EE','Embodied Energy'),
+        ('PE','Process Energy'),
+        ('EX','Exergy'),
+        ('EM','Emergy'),
+        )
+    ),
+    ('Other', (
+        ('%Y','Percent Yield'),
+        ('MT','Mean time before failure'),
+        ('MF','Maintenance-free Operating Period'),
+        ('PR','Property Value'),
+        )
+    ),
+)
+ptypes = (
+    ('Mass', (
+        ('mco','Concentration'),
+        ('mdi','Dispersion'),
+        ('mxp','Transport'),
+        ('mre','Reduction'),
+        ('mac','Accretion'),
+        ('mmi','Milling'),
+        ('mgr','Grinding'),
+        ('mcu','Cutting'),
+        ('mbe','Bending'),
+        ('mfo','Forming'),
+        ('mag','Aggregation'),
+        ('msm','Smelting'),        
+        ('mds','Dissolution'),
+        ('mas','Assembling'),
+        ('mal','Alloying'),
+        ('mus','Disassembling'),
+        ('mrp','Repairing'),
+        ('mrc','Recycling'),
+        ('mrx','Reaction'),
+        )
+    ),
+    ('Energy', (   
+        ('egc','Conversion'),
+        ('egs','Storage'),
+        ('ego','Concentration'),
+        ('ege','Entropic'),
+        ('egf','Flow'),
+        )
+    ),
+    ('Time', (
+        ('ter','Erosion'),
+        )
+    ),
+    ('Actor',(
+        ('asc','State Change'),
+        )
+    ),
+)
+argtypes = (('I','Input'),('O','Output'))
+ctypes = (
+    ('J','Journal article'),('R','Report'),('P','Personal communication'),
+    ('B','Book'),('M','Memo')
+)
+atypes = ( ('org','Organization'),('ogn','Organism'),('sys','System'),('hom','Person') )
+
+class NEResource(models.Model):
+    ##########################
+    # ID namespace:
+    # 0:       Time
+    # 1-118:   Elements by atomic number
+    # 119:     Energy
+    # 120-256: Top 136 most abundant materials
+    # ID is a 6-character hex code, giving the possibility for up to 
+    # 16,777,216 different resources in the database.
+    # Size of fully-populated NEResource table: 432MiB
+    ##########################
+    # NEResource names:
+    # Please try to stay within 20 characters.  If the name is longer, it will
+    # be replaced with a longname ID, which will point to a row in a table of 
+    # long names.  This is done to speed up searching and reduce the size of
+    # this required table.
+    ##########################
+    name = models.CharField(max_length=20)
+    ##########################
+    # R Classes:
+    # R: Resource
+    # M: Material
+    # P: Product
+    # S: Service
+    # D: Data
+    ##########################
+    rclass = models.CharField(max_length=1,choices=rclasses,
+                              blank=True,default='R',
+                              verbose_name='Resource Class')
+    deps = []
+    class Meta:
+        verbose_name = 'Resource'
+    
+    def __repr__(self):
+        end = ''
+        if self.deps != []:
+            end += '\n'
+            for d in self.deps:
+                end += '\t %f x %s\n' % (d.dependency_mult,d.dependency)
+        return self.name + end
+    def __unicode__(self):
+        return self.__repr__()
+    def addDependency(self,dependency=None,dependency_mult=1.):
+        dep = Dependency(resource=self,dependency=dependency,dependency_mult=dependency_mult)
+        self.deps += [dep]
+        return
+        
+        
+class Dependency(models.Model):
+    resource = models.ForeignKey(NEResource,related_name='dep_parent')
+    dependency = models.ForeignKey(NEResource,related_name='dep')
+    dependency_mult = models.FloatField(default=1.0,verbose_name='Dependency Multiplicity')
+    class Meta:
+        verbose_name_plural = 'Dependencies'
+    
+    def __repr__(self):
+        return "%5.2f x %s" % (self.dependency_mult, self.dependency)
+    def __unicode__(self):
+        return self.__repr__()
+        
+class NEMaterialClass(models.Model):
+    classname = models.CharField(max_length=50,verbose_name='Class Name')
+    description = models.TextField(blank=True,default='')
+    current_standard = models.ForeignKey('NEMaterial',related_name='+',
+                                         blank=True,null=True,
+                                         verbose_name='Current Standard')
+    class Meta:
+        verbose_name = 'Material Class'
+        verbose_name_plural = 'Material Classes'
+    
+    def __repr__(self):
+        return "Material class: %s:\n \"%s\"\n Current standard: %s" % \
+            (self.classname,self.description,self.current_standard)
+    def __unicode__(self):
+        return self.__repr__()
+        
+        
+class NEMaterial(NEResource):
+    # ID is a 6-character hex code
+    # The materials address space could be broken down further using material classes.
+    # e.g. Polymer, Structural, Refractory, Conductive.
+    # This could also be automatically defined using extended property selection.
+    __addressspace__ = (120,524288)
+    mclass = models.ForeignKey(NEMaterialClass,related_name='+',
+                               blank=True,null=True,
+                               verbose_name='Material Class')
+    class Meta:
+        verbose_name = 'Material'
+    
+    def __repr__(self):
+        return "Material %s, type %i" % (self.name,self.mclass)
+    def __unicode__(self):
+        return self.__repr__()
+
+
+class NEProductClass(models.Model):
+    classname = models.CharField(max_length=50,verbose_name='Class Name')
+    description = models.TextField(blank=True,default='')
+    current_standard = models.ForeignKey('NEProduct',related_name='+',
+                                         blank=True,null=True,
+                                         verbose_name='Current Standard')
+    class Meta:
+        verbose_name = 'Product Class'        
+        verbose_name_plural = 'Product Classes'                            
+    
+    def __repr__(self):
+        return "Product class %s:\n \"%s\"\n Current standard: %s" % \
+            (self.classname,self.description,self.current_standard)
+    def __unicode__(self):
+        return self.__repr__()
+    
+
+class NEProduct(NEResource):
+    # ID is a 6-character hex code
+    # There are 16,252,928 possible products that can go in this database.
+    # This address space could be broken down further using product classes.
+    __addressspace__ = (524288,16777216)
+    pclass = models.ForeignKey(NEProductClass,related_name='+',blank=True,null=True)
+    class Meta:
+        verbose_name = 'Product'    
+    
+    def __repr__(self):
+        return "Product %s, type %s" % (self.name,self.pclass)
+    def __unicode__(self):
+        return self.__repr__()        
+
+class NEProperty(models.Model):
+    rid = models.ForeignKey('NEResource',related_name='prrsc',
+                            blank=True,null=True,
+                            verbose_name='Resource')
+    pid = models.ForeignKey('NEProcess',related_name='prpro',
+                            blank=True,null=True,
+                            verbose_name='Process')
+    aid = models.ForeignKey('NEActor',related_name='pract',
+                            blank=True,null=True,
+                            verbose_name='Actor')
+    name = models.CharField(max_length=50)
+    unit = models.CharField(max_length=50)
+    pclass = models.ForeignKey('NEPropertyClass',related_name='+',verbose_name='Property Class')
+    class Meta:
+        verbose_name = 'Property'
+        verbose_name_plural = 'Properties'
+    
+    def __repr__(self):
+        return '%s of %s: %f %s' % (self.name,self.rid,self.value,self.unit)
+    def __unicode__(self):
+        return self.__repr__()
+
+
+class NEPropertyClass(models.Model):
+    classname = models.CharField(max_length=30,verbose_name='Class name')
+    description = models.TextField(blank=True,default='')
+    effects = models.ManyToManyField('NEPropertyClass',related_name='affected')
+    class Meta:
+        verbose_name = 'Property Class'
+        verbose_name_plural = 'Property Classes'
+    
+    def __repr__(self):
+        '%s,\n %s\n Affects:\n %s' % (self.classname,self.description,self.effects)
+    def __unicode__(self):
+        return self.__repr__()
+    
+# NE Process represents an industrial process or (limited scale) natural process.
+class NEProcess(models.Model):
+    pname = models.CharField(max_length=30,verbose_name='Process name')
+    ptype = models.CharField(max_length=1,choices=ptypes,verbose_name='Process type')
+    inputs = []
+    outputs = []         
+    class Meta:
+        verbose_name = 'Process'
+        verbose_name_plural = 'Processes'
+
+    def addNewIO(self,argid=None,argweight=None,argtype=None):
+        if argid == None:
+            raise ValueError("You must specify a resource.")
+        if argweight == None:
+            raise ValueError("You must specify a weight.")
+        if argtype == 'I':
+            argtype='I'
+        elif argtype == 'O':
+            argtype='O'
+        self.inputs += [NEProcessIO(pid=self,argid=argid,argweight=argweight,argtype=argtype)]
+    
+    def __repr__(self):
+        return "%s (Type %s)\n Inputs: %s \n Outputs: %s" % (self.pname,self.ptype,self.inputs,self.outputs)
+            
+class NEProcessIO(models.Model):
+    __tablename__ = 'processio'
+    pid = models.ForeignKey(NEProcess,related_name='process',verbose_name='Process')
+    argid = models.ForeignKey(NEResource,related_name='arg',verbose_name='Argument')
+    argweight = models.FloatField(default=1.0,verbose_name='Argument weight')
+    argtype = models.CharField(max_length=1,choices=argtypes,verbose_name='Argument type')
+    class Meta:
+        verbose_name = 'Process IO'
+        verbose_name_plural = 'Process IO'
+
+#NE Citation is a simple research citation class until I implement Zotero support.
+# Because it is not intended to be in the project long-term, it will be limited to only
+# a few types.        
+class NECitation(models.Model):
+    title = models.CharField(max_length=100)
+    author = models.CharField(max_length=50,blank=True,default='Unknown Author')
+    date = models.DateField(blank=True,auto_now_add=True)
+    doi = models.CharField(max_length=30,blank=True,default='',verbose_name='DOI')
+    isbn = models.CharField(max_length=13,blank=True,default='',verbose_name='ISBN')
+    ctype = models.CharField(max_length=1,choices=ctypes,verbose_name='Citation type')
+    class Meta:
+        verbose_name = 'Citation'
+    
+    def __repr__(self):
+        output = ""
+        if self.title is not None: output += self.title + ". "
+        if self.author is not None: 
+            output += self.author + ", "
+        if self.doi is not None: output += self.doi + " "
+        return output
+
+    def __unicode__(self):
+        return self.__repr__()        
+        
+        
+# NESurveyValue is intended to represent a single data point.
+class NESurveyValue(models.Model):
+    # Resource or process ID
+    resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='svrsc')
+    process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='svproc')
+    actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='svact')
+    # UNIX time of observation
+    date = models.DateField()
+    # Value type.  See static 'valuetypes' definition for documentation.    
     valuetype = models.CharField(max_length=3,choices=valuetypes)
     value = models.FloatField()
+    unit = models.CharField(max_length=10)
+    # If this is about a property of a resource, put the property here.
+    prop_pointer = models.ForeignKey('NEProperty',blank=True,null=True,
+                                     related_name='+',verbose_name='Property')
     # Location of the survey; May be replaced with "energy distance"
-    loc = models.TextField()
-    ref = models.ForeignKey(NECitation)
-    # Valid valuetype codes:
+    loc = models.TextField(verbose_name='Location')
+    # All survey values should have citations to back them up.
+    ref = models.ForeignKey(NECitation,verbose_name='Citation')
+    class Meta:
+        verbose_name = 'Survey Value'
         
     def __repr__(self):
         sinq = ""
         inq = None
-        if self.resource != None:
+        if self.resource is not None:
             sinq = "Resource: "
             inq = self.resource
-        if self.process != None:
+        if self.process is not None:
             sinq = "Process: "
             inq = self.process
-        start = sinq + "%i Year: %s Type: %s Value: %5.2f Location: %s Reference: %s" \
-            % (inq,self.t.strftime("%Y"),self.valuetype,self.value,self.loc,self.ref)
-        if self.locs != None: l = "\n Location: %s" % self.loc
+        
+        start = sinq + "%s\n Year: %s\n Type: %s\n Value: %5.2f%s \n Location: %s \n Reference: %s" \
+            % (inq,self.date.strftime("%Y"),self.valuetype,self.value,self.unit,self.loc,self.ref)
+        if self.loc != None: l = "\n Location: %s" % self.loc
         else: l = "No Location"
         if self.ref != None: ref = "\n Reference: %s" % self.ref
         else: ref = "\n Unsourced"
         return str(start+l+ref)
-
+        
+    def __unicode__(self):
+        return self.__repr__()
    
 # NEResourceInfo is designed to represent information extrapolated from a collection of data,
 # as in a statistical survey or meta-study.
 class NESurveyInfo(models.Model):
-    resource = models.ForeignKey(NEResource,empty=True)
-    process = models.ForeignKey(NEProcess,empty=True)
-    actor = models.ForeignKey('NEActor',empty=True)
+    resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='sirsc')
+    process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='siproc')
+    actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='siact')
     starttime = models.DateField()
-    endtime = models.DateField(empty=True)
+    endtime = models.DateField(blank=True,default=starttime)
     value = models.FloatField()
     valuetype = models.CharField(max_length=3,choices=valuetypes)
     infotype = models.CharField(max_length=1,choices=infotypes)
     citations = []
+    class Meta:
+        verbose_name = 'Survey Info'
+        verbose_name_plural = 'Survey Info'    
     
     def setCitations(self,citations):
         ctype = type(citations[0])
@@ -319,28 +434,37 @@ class NESurveyInfo(models.Model):
     def __repr__(self):
         sinq = ""
         inq = None
-        if self.resource != None:
+        if self.resource is not None:
             sinq = "Resource: "
             inq = self.resource
-        if self.process != None:
+        if self.process is not None:
             sinq = "Process: "
             inq = self.process
+        if self.actor is not None:
+            sinq = "Actor: "
+            inq = self.actor
         start = sinq + "%i Value: %5.2f Type: %s Start time: %s End time: %s" \
             % (inq,self.value, self.infotype,self.t.strftime("%Y"),self.endtime.strftime("%Y"))
-        if self.loc != None: l = "\n Location: %s" % self.loc
+        if self.loc is not None: l = "\n Location: %s" % self.loc
         else: l = "No Location"
-        if self.ref != None: ref = "\n Reference: %s" % self.ref
+        if self.ref is not None: ref = "\n Reference: %s" % self.ref
         else: ref = "Unsourced"
         return str(start+l+ref)
+    def __unicode__(self):
+        return self.__repr__()
 
 class NEInfoCitation(models.Model):
-    description = models.TextField(blank=True)
-    iid = models.ForeignKey(NESurveyInfo)
-    cid = models.ForeignKey(NECitation)
-    
+    description = models.TextField(blank=True,default='')
+    iid = models.ForeignKey(NESurveyInfo,related_name='+')
+    cid = models.ForeignKey(NECitation,related_name='+')
+    class Meta:
+        verbose_name = 'Info Citation'
     
 #NE Actor is the base class for organisms, organizations, and complex systems.
 class NEActor(models.Model):
     name = models.CharField(max_length=30)
-    parents = models.ManyToMany('NEActor')
-    children = models.ManyToMany('NEActor')
+    parents = models.ManyToManyField('NEActor',related_name='aparent',blank=True,null=True)
+    children = models.ManyToManyField('NEActor',related_name='achild',blank=True,null=True)
+    atype = models.CharField(max_length=3,choices=atypes)
+    class Meta:
+        verbose_name = 'Actor'

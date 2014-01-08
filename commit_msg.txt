@@ -1,27 +1,27 @@
-Initial commit
+8 January 2014: Admin initial setup, model extension
 
-Rebuilt the RDB SQL Alchemy application as a Django model.  Next up should be web form entry of data, and translation of SQL data into Pandas data frames
-# Please enter the commit message for your changes. Lines starting
-# with '#' will be ignored, and an empty message aborts the commit.
- On branch master
-#
- Initial commit
-#
+Debugged much of the model definitions.  Added metadata and documentation.  Generated admin file and started modifying it.
+
+# On branch master
 # Changes to be committed:
-#   (use "git rm --cached <file>..." to unstage)
+#   (use "git reset HEAD <file>..." to unstage)
 #
-	new file:   NatEcon/__init__.py
 #	new file:   NatEcon/__init__.pyc
-	new file:   NatEcon/settings.py
+	modified:   NatEcon/settings.py
 #	new file:   NatEcon/settings.pyc
-	new file:   NatEcon/urls.py
-	new file:   NatEcon/wsgi.py
+#	new file:   NatEcon/urls.pyc
 #	new file:   NatEcon/wsgi.pyc
-	new file:   RDb/__init__.py
-	new file:   RDb/admin.py
-	new file:   RDb/models.py
-	new file:   RDb/tests.py
-	new file:   RDb/views.py
-	new file:   manage.py
-	new file:   nedb.sqlite3
+#	new file:   RDb/__init__.pyc
+	modified:   RDb/admin.py
+#	new file:   RDb/admin.pyc
+	modified:   RDb/models.py
+#	new file:   RDb/models.pyc
+	new file:   Templates/base_site.html
+	modified:   nedb.sqlite3
+#
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   commit_msg.txt
 #

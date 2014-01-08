@@ -22,6 +22,10 @@ SECRET_KEY = 'lu3o8hu813j-=ieren!1&jz4+9f09^&th&bck16-9m&ta#cjcu'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+TEMPLATE_DIRS = (
+    '/home/acumen/Documents/Sage/NatEcon/Templates', # Change this to your own directory.
+)
+
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -36,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'RDb',
 )
 
 MIDDLEWARE_CLASSES = (
