@@ -1,0 +1,27 @@
+Initial commit
+
+Rebuilt the RDB SQL Alchemy application as a Django model.  Next up should be web form entry of data, and translation of SQL data into Pandas data frames
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+ On branch master
+#
+ Initial commit
+#
+# Changes to be committed:
+#   (use "git rm --cached <file>..." to unstage)
+#
+	new file:   NatEcon/__init__.py
+#	new file:   NatEcon/__init__.pyc
+	new file:   NatEcon/settings.py
+#	new file:   NatEcon/settings.pyc
+	new file:   NatEcon/urls.py
+	new file:   NatEcon/wsgi.py
+#	new file:   NatEcon/wsgi.pyc
+	new file:   RDb/__init__.py
+	new file:   RDb/admin.py
+	new file:   RDb/models.py
+	new file:   RDb/tests.py
+	new file:   RDb/views.py
+	new file:   manage.py
+	new file:   nedb.sqlite3
+#
