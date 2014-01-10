@@ -1,14 +1,18 @@
-9 January 2014: Dataframe integration, managers
+10 January 2014: Periodic Table
 
-Continued debugging model definitions.  Began integrating Pandas dataframe functionality into the application using 'Django-Pandas' by Chrisdev.  The codebase is small, so it was integrated directly into RDb's code, rather than being introduced as a dependency.  It does, however, depend on Manager-Utils.PassThroughManager to work as intended.  Added custom managers to the Survey classes since they cover three possible survey targets (resources, processes, and actors).# On branch master
+Adapted an old static operation into a script to generate a JSON file of NEResources representing the periodic table.  This, along with an adaptation of the University of Bath's Inventory of Carbon and Energy database will be used to repopulate the database after modification.
+
+# On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
-#	new file:   .gitignore
-#	modified:   RDb/admin.py
-#	new file:   RDb/io.py
-#	new file:   RDb/managers.py
+#	modified:   RDb/managers.py
 #	modified:   RDb/models.py
+#	new file:   ptable.py
+#
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
 #	modified:   commit_msg.txt
-#	modified:   nedb.sqlite3
 #

@@ -91,6 +91,7 @@ valuetypes = (
         ('MT','Mean time before failure'),
         ('MF','Maintenance-free Operating Period'),
         ('PR','Property Value'),
+        ('EC','Embodied Carbon')
         )
     ),
 )
@@ -159,6 +160,7 @@ class NEResource(models.Model):
     # this required table.
     ##########################
     name = models.CharField(max_length=20)
+    long_name = models.CharField(max_length=128)
     ##########################
     # R Classes:
     # R: Resource
