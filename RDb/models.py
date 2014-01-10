@@ -1,4 +1,6 @@
 from django.db import models
+from managers import *
+from datetime import date
 """
 Created on Tue Jan  7 12:55:59 2014
 
@@ -35,33 +37,33 @@ infotypes = (
     ('x','Safety'),
 )
 # Valuetype can be one of the following:
-    #########################################
-    # Mass-based
-    #  K,S,E,D: Resource mass quantity, in kg
-    #       K: resources known (R,M)
-    #       S: resources in reserve (R) or inventory (M,P)
-    #       E: reserve and allocated resources (R,M) or products in use (P)
-    #       D: material requirements (R,M) or product demand (P). The latter requires user input.
-    #########################################
-    # Rate-based
-    #   dK,dS,dE,dD: Changes in  in kg per year 
-    #       dK: rate of discovery (R,M)
-    #       dS: replenishment rate (RR) or discovery rate (NRR)
-    #       dE: extraction rate (R) or production rate (M,P)
-    #       dD: rate of change in demand
-    #   dEG,dEE,dEX,dEM: Changes in kWh/kg per year
-    #       dEE: rate of change in embodied energy
-    #       dPE: rate of change in process energy
-    #       dEX: rate of change in exergy
-    #       dEM: rate of change in emergy
-    #########################################
-    # Energy-based
-    #  EG, EE, EX, EM: Energy input requirement for the resource in kWh/kg
-    #       EE: embodied energy content
-    #       PE: process energy
-    #       EX: exergy value
-    #       EM: emergy value
-    #########################################
+#########################################
+# Mass-based
+#  K,S,E,D: Resource mass quantity, in kg
+#       K: resources known (R,M)
+#       S: resources in reserve (R) or inventory (M,P)
+#       E: reserve and allocated resources (R,M) or products in use (P)
+#       D: material requirements (R,M) or product demand (P). The latter requires user input.
+#########################################
+# Rate-based
+#   dK,dS,dE,dD: Changes in  in kg per year 
+#       dK: rate of discovery (R,M)
+#       dS: replenishment rate (RR) or discovery rate (NRR)
+#       dE: extraction rate (R) or production rate (M,P)
+#       dD: rate of change in demand
+#   dEG,dEE,dEX,dEM: Changes in kWh/kg per year
+#       dEE: rate of change in embodied energy
+#       dPE: rate of change in process energy
+#       dEX: rate of change in exergy
+#       dEM: rate of change in emergy
+#########################################
+# Energy-based
+#  EG, EE, EX, EM: Energy input requirement for the resource in kWh/kg
+#       EE: embodied energy content
+#       PE: process energy
+#       EX: exergy value
+#       EM: emergy value
+#########################################
 valuetypes = (
     ('Mass', (
         ('K','Known'),
@@ -168,31 +170,26 @@ class NEResource(models.Model):
     rclass = models.CharField(max_length=1,choices=rclasses,
                               blank=True,default='R',
                               verbose_name='Resource Class')
-    deps = []
+    objects = models.Manager()
+    dataframe = DataFrameManager()
+    
     class Meta:
         verbose_name = 'Resource'
     
     def __repr__(self):
-        end = ''
-        if self.deps != []:
-            end += '\n'
-            for d in self.deps:
-                end += '\t %f x %s\n' % (d.dependency_mult,d.dependency)
-        return self.name + end
+        return self.name
     def __unicode__(self):
         return self.__repr__()
-    def addDependency(self,dependency=None,dependency_mult=1.):
-        dep = Dependency(resource=self,dependency=dependency,dependency_mult=dependency_mult)
-        self.deps += [dep]
-        return
         
         
-class Dependency(models.Model):
-    resource = models.ForeignKey(NEResource,related_name='dep_parent')
-    dependency = models.ForeignKey(NEResource,related_name='dep')
+class NEDependency(models.Model):
+    parent_resource = models.ForeignKey('NEMaterial',related_name='parent')
+    dependency = models.ForeignKey(NEResource)
     dependency_mult = models.FloatField(default=1.0,verbose_name='Dependency Multiplicity')
+    
     class Meta:
         verbose_name_plural = 'Dependencies'
+        unique_together = (('parent_resource','dependency'),)
     
     def __repr__(self):
         return "%5.2f x %s" % (self.dependency_mult, self.dependency)
@@ -205,6 +202,9 @@ class NEMaterialClass(models.Model):
     current_standard = models.ForeignKey('NEMaterial',related_name='+',
                                          blank=True,null=True,
                                          verbose_name='Current Standard')
+    objects = models.Manager()
+    dataframe = DataFrameManager()
+    
     class Meta:
         verbose_name = 'Material Class'
         verbose_name_plural = 'Material Classes'
@@ -225,6 +225,12 @@ class NEMaterial(NEResource):
     mclass = models.ForeignKey(NEMaterialClass,related_name='+',
                                blank=True,null=True,
                                verbose_name='Material Class')
+                               
+    deps = models.ManyToManyField(NEResource, related_name='forward_dependency',through='NEDependency',
+                                  symmetrical=False,verbose_name='Dependency')
+    objects = models.Manager()
+    dataframe = DataFrameManager()
+    
     class Meta:
         verbose_name = 'Material'
     
@@ -240,6 +246,10 @@ class NEProductClass(models.Model):
     current_standard = models.ForeignKey('NEProduct',related_name='+',
                                          blank=True,null=True,
                                          verbose_name='Current Standard')
+
+    objects = models.Manager()
+    dataframe = DataFrameManager()
+
     class Meta:
         verbose_name = 'Product Class'        
         verbose_name_plural = 'Product Classes'                            
@@ -251,12 +261,16 @@ class NEProductClass(models.Model):
         return self.__repr__()
     
 
-class NEProduct(NEResource):
+class NEProduct(NEMaterial):
     # ID is a 6-character hex code
     # There are 16,252,928 possible products that can go in this database.
     # This address space could be broken down further using product classes.
     __addressspace__ = (524288,16777216)
     pclass = models.ForeignKey(NEProductClass,related_name='+',blank=True,null=True)
+    
+    objects = models.Manager()
+    dataframe = DataFrameManager()    
+    
     class Meta:
         verbose_name = 'Product'    
     
@@ -306,7 +320,11 @@ class NEProcess(models.Model):
     pname = models.CharField(max_length=30,verbose_name='Process name')
     ptype = models.CharField(max_length=1,choices=ptypes,verbose_name='Process type')
     inputs = []
-    outputs = []         
+    outputs = []    
+
+    objects = models.Manager()
+    dataframe = DataFrameManager()
+     
     class Meta:
         verbose_name = 'Process'
         verbose_name_plural = 'Processes'
@@ -335,9 +353,9 @@ class NEProcessIO(models.Model):
         verbose_name = 'Process IO'
         verbose_name_plural = 'Process IO'
 
-#NE Citation is a simple research citation class until I implement Zotero support.
-# Because it is not intended to be in the project long-term, it will be limited to only
-# a few types.        
+# NE Citation is a simple research citation class until I implement Zotero support.
+#  Because it is not intended to be in the project long-term, it will be limited to only
+#   a few types.        
 class NECitation(models.Model):
     title = models.CharField(max_length=100)
     author = models.CharField(max_length=50,blank=True,default='Unknown Author')
@@ -345,6 +363,10 @@ class NECitation(models.Model):
     doi = models.CharField(max_length=30,blank=True,default='',verbose_name='DOI')
     isbn = models.CharField(max_length=13,blank=True,default='',verbose_name='ISBN')
     ctype = models.CharField(max_length=1,choices=ctypes,verbose_name='Citation type')
+    
+    objects = models.Manager()
+    dataframe = DataFrameManager()    
+    
     class Meta:
         verbose_name = 'Citation'
     
@@ -379,6 +401,14 @@ class NESurveyValue(models.Model):
     loc = models.TextField(verbose_name='Location')
     # All survey values should have citations to back them up.
     ref = models.ForeignKey(NECitation,verbose_name='Citation')
+    
+    # Managers
+    objects = models.Manager()
+    resources = ResourceSurveyManager()
+    processes = ProcessSurveyManager()
+    actors = ActorSurveyManager()
+    dataframe = DataFrameManager()    
+    
     class Meta:
         verbose_name = 'Survey Value'
         
@@ -391,9 +421,8 @@ class NESurveyValue(models.Model):
         if self.process is not None:
             sinq = "Process: "
             inq = self.process
-        
-        start = sinq + "%s\n Year: %s\n Type: %s\n Value: %5.2f%s \n Location: %s \n Reference: %s" \
-            % (inq,self.date.strftime("%Y"),self.valuetype,self.value,self.unit,self.loc,self.ref)
+        start = sinq + "%s\n Year: \n Type: %s\n Value: %5.2f%s \n" \
+            % (inq,self.valuetype,self.value,self.unit,self.loc,self.ref)
         if self.loc != None: l = "\n Location: %s" % self.loc
         else: l = "No Location"
         if self.ref != None: ref = "\n Reference: %s" % self.ref
@@ -409,12 +438,16 @@ class NESurveyInfo(models.Model):
     resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='sirsc')
     process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='siproc')
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='siact')
-    starttime = models.DateField()
-    endtime = models.DateField(blank=True,default=starttime)
+    startdate = models.DateField()
+    enddate = models.DateField(blank=True,default=startdate)
     value = models.FloatField()
     valuetype = models.CharField(max_length=3,choices=valuetypes)
     infotype = models.CharField(max_length=1,choices=infotypes)
     citations = []
+    
+    objects = models.Manager()
+    dataframe = DataFrameManager()    
+    
     class Meta:
         verbose_name = 'Survey Info'
         verbose_name_plural = 'Survey Info'    
@@ -444,7 +477,7 @@ class NESurveyInfo(models.Model):
             sinq = "Actor: "
             inq = self.actor
         start = sinq + "%i Value: %5.2f Type: %s Start time: %s End time: %s" \
-            % (inq,self.value, self.infotype,self.t.strftime("%Y"),self.endtime.strftime("%Y"))
+            % (inq,self.value, self.infotype,self.startdate.strftime("%Y"),self.enddate.strftime("%Y"))
         if self.loc is not None: l = "\n Location: %s" % self.loc
         else: l = "No Location"
         if self.ref is not None: ref = "\n Reference: %s" % self.ref

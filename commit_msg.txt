@@ -1,27 +1,14 @@
-8 January 2014: Admin initial setup, model extension
+9 January 2014: Dataframe integration, managers
 
-Debugged much of the model definitions.  Added metadata and documentation.  Generated admin file and started modifying it.
-
-# On branch master
+Continued debugging model definitions.  Began integrating Pandas dataframe functionality into the application using 'Django-Pandas' by Chrisdev.  The codebase is small, so it was integrated directly into RDb's code, rather than being introduced as a dependency.  It does, however, depend on Manager-Utils.PassThroughManager to work as intended.  Added custom managers to the Survey classes since they cover three possible survey targets (resources, processes, and actors).# On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
-#	new file:   NatEcon/__init__.pyc
-	modified:   NatEcon/settings.py
-#	new file:   NatEcon/settings.pyc
-#	new file:   NatEcon/urls.pyc
-#	new file:   NatEcon/wsgi.pyc
-#	new file:   RDb/__init__.pyc
-	modified:   RDb/admin.py
-#	new file:   RDb/admin.pyc
-	modified:   RDb/models.py
-#	new file:   RDb/models.pyc
-	new file:   Templates/base_site.html
-	modified:   nedb.sqlite3
-#
-# Changes not staged for commit:
-#   (use "git add <file>..." to update what will be committed)
-#   (use "git checkout -- <file>..." to discard changes in working directory)
-#
+#	new file:   .gitignore
+#	modified:   RDb/admin.py
+#	new file:   RDb/io.py
+#	new file:   RDb/managers.py
+#	modified:   RDb/models.py
 #	modified:   commit_msg.txt
+#	modified:   nedb.sqlite3
 #
