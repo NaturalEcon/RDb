@@ -1,0 +1,45 @@
+Material Profile: Aggregate#########
+Embodied Energy (EE) ICE-Database Statistics - MJ/Kg#########
+Main Material#No. Records#Average EE #Standard Deviation#Minimum EE#Maximum EE####
+Aggregate#37#0.11#0.12#0.01#0.50####
+Aggregate, General#37#0.11#0.12#0.01#0.50####
+Predominantly Recycled#3#0.25#0.21#0.10#0.40####
+Unspecified#17#0.11#0.07#0.02#0.28####
+Virgin#17#0.10#0.15#0.01#0.50####
+Selected Embodied Energy & Carbon Coefficients and Associated Data#########
+Material#Embodied Energy - MJ/Kg#Embodied Carbon - Kg CO2e/Kg#Boundaries#Best EE Range - MJ/Kg#####
+####Low EE#High EE####
+General Aggregate#0.083#0.0052#Cradle to Gate#0.05#0.25####
+Material Profile: Aluminium#########
+Embodied Energy (EE) ICE-Database Statistics - MJ/Kg#########
+Main Material#No. Records###Average EE ###Std Deviation#Minimum EE#Maximum EE
+Aluminium#111###157.1###104.7#8.0#382.7
+Aluminium, General#111###157.1###104.7#8.0#382.7
+50% Recycled#4###108.6###53.4#58.0#184.0
+Other Specification#3###146.5###79.3#55.0#193.5
+Predominantly Recycled#28###17.9###8.7#8.0#42.9
+Unspecified#14###169.1###67.0#68.0#249.9
+Virgin#62###224.1###68.5#39.2#382.7
+Selected Embodied Energy & Carbon Coefficients and Associated Data#########
+Material#Embodied Energy - MJ/Kg###Embodied Carbon - Kg CO2e/Kg###Boundaries#Best EE Range - MJ/Kg#
+#Typical#Primary#Secondary#Typical#Primary#Secondary##Low EE#High EE
+General Aluminium#155#218#29#9.16#12.79#1.81#Cradle to Gate#(+/-20%)#
+Cast Products#159#226#25#9.22#13.10#1.45###
+Extruded#154#214#34#9.08#12.50#2.12###
+Rolled#155#217#28#9.18#12.80#1.79###
+Material Profile: Asphalt#########
+Embodied Energy (EE) ICE-Database Statistics - MJ/Kg#########
+Main Material#No. Records#Average EE #Standard Deviation#Minimum EE#Maximum EE####
+Asphalt#17#6.63#11.89#0.20#50.20####
+Asphalt, General#17#6.63#11.89#0.20#50.20####
+Predominantly Recycled#2#7.32#0.28#7.12#7.52####
+Unspecified#13#7.46#13.47#0.23#50.20####
+Virgin#2#0.49#0.40#0.20#0.77####
+Selected Embodied Energy & Carbon Coefficients and Associated Data#########
+Material#Embodied Energy - MJ/Kg#Feedstock Energy (Included)  - MJ/Kg#Embodied Carbon - Kg CO2e/Kg#Boundaries#Best EE Range - MJ/Kg####
+#####Low EE#High EE###
+Asphalt, 4% (bitumen) binder content (by mass)#2.86#1.68#0.066#Cradle to Gate#(+/- 30%)####
+Asphalt, 5% binder content#3.39#2.1#0.071######
+Asphalt, 6% binder content#3.93#2.52#0.076######
+Asphalt, 7% binder content#4.46#2.94#0.081######
+Asphalt, 8% binder content#5.00#3.36#0.086######

@@ -1,14 +1,15 @@
-10 January 2014: Periodic Table
+11 January 2014: Model tweaking, ICE integration.
 
-Adapted an old static operation into a script to generate a JSON file of NEResources representing the periodic table.  This, along with an adaptation of the University of Bath's Inventory of Carbon and Energy database will be used to repopulate the database after modification.
+I tweaked the models to be more relational, and to accomodate some early things I found in the ICE database.
 
 # On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
-#	modified:   RDb/managers.py
+#	new file:   ICE-csv.csv
 #	modified:   RDb/models.py
-#	new file:   ptable.py
+#	new file:   SupportingFiles/aggregate.csv
+#	new file:   SupportingFiles/aggregates.csv
 #
 # Changes not staged for commit:
 #   (use "git add <file>..." to update what will be committed)
