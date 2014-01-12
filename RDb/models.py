@@ -200,11 +200,16 @@ class NEDependency(models.Model):
         return self.__repr__()
         
 class NEMaterialClass(models.Model):
-    classname = models.CharField(max_length=50,verbose_name='Class Name')
+    classname = models.CharField(max_length=64,verbose_name='Class Name')
+    subtype = models.CharField(max_length=64,blank=True,null=True)
     description = models.TextField(blank=True,default='')
     current_standard = models.ForeignKey('NEMaterial',related_name='std_of_material_class',
                                          blank=True,null=True,
                                          verbose_name='Current Standard')
+    members = models.ManyToManyField('NEMaterial',related_name='parent_class',
+                                         verbose_name='Member Materials')
+    subclasses = models.ManyToManyField('NEMaterialClass',related_name='superclass',
+                                         symmetrical=False,'Subclasses')
     objects = models.Manager()
     dataframe = DataFrameManager()
     
@@ -217,7 +222,6 @@ class NEMaterialClass(models.Model):
             (self.classname,self.description,self.current_standard)
     def __unicode__(self):
         return self.__repr__()
-        
         
 class NEMaterial(NEResource):
     # ID is a 6-character hex code

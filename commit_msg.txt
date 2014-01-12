@@ -1,15 +1,15 @@
-11 January 2014: Model tweaking, ICE integration.
+11 January 2014: JSON translation of ICE database
 
-I tweaked the models to be more relational, and to accomodate some early things I found in the ICE database.
+Wrote a script to translate the ICE database into JSON models for the RDb application.
 
 # On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
-#	new file:   ICE-csv.csv
+#	new file:   ICE-MC-json.js
+#	new file:   ICE-adaptation.csv
+#	new file:   ICE.py
 #	modified:   RDb/models.py
-#	new file:   SupportingFiles/aggregate.csv
-#	new file:   SupportingFiles/aggregates.csv
 #
 # Changes not staged for commit:
 #   (use "git add <file>..." to update what will be committed)
