@@ -93,6 +93,7 @@ valuetypes = (
         ('MF','Maintenance-free Operating Period'),
         ('PR','Property Value'),
         ('EC','Embodied Carbon')
+        ('ECe','Embodied Carbon Emitted')
         )
     ),
 )
@@ -229,7 +230,7 @@ class NEMaterial(NEResource):
     # e.g. Polymer, Structural, Refractory, Conductive.
     # This could also be automatically defined using extended property selection.
     __addressspace__ = (120,524288)
-    mclass = models.ForeignKey(NEMaterialClass,related_name='material_class_members',
+    mclass = models.ManyToManyField(NEMaterialClass,related_name='material_class_members',
                                blank=True,null=True,
                                verbose_name='Material Class')
                                
@@ -253,7 +254,10 @@ class NEProductClass(models.Model):
     current_standard = models.ForeignKey('NEProduct',related_name='std_of_product_class',
                                          blank=True,null=True,
                                          verbose_name='Current Standard')
-
+    members = models.ManyToManyField('NEProduct',related_name='parent_rclass',
+                                         verbose_name='Member Products')
+    subclasses = models.ManyToManyField('NEMaterialClass',related_name='superclass',
+                                         symmetrical=False,'Subclasses')
     objects = models.Manager()
     dataframe = DataFrameManager()
 
@@ -404,7 +408,7 @@ class NESurveyValue(models.Model):
     prop_pointer = models.ForeignKey('NEProperty',blank=True,null=True,
                                      related_name='property_data',verbose_name='Property')
     # Location of the survey; May be replaced with "energy distance"
-    loc = models.TextField(verbose_name='Location')
+    location = models.TextField(verbose_name='Location')
     # All survey values should have citations to back them up.
     ref = models.ForeignKey(NECitation,verbose_name='Citation')
     
@@ -449,7 +453,9 @@ class NESurveyInfo(models.Model):
     value = models.FloatField()
     valuetype = models.CharField(max_length=3,choices=valuetypes)
     infotype = models.CharField(max_length=1,choices=infotypes)
-    records = []
+    records = models.ManyToManyField('NECitation',through='NEInfoCitation',
+                                     related_name='cited_by',symmetrical=True)
+    location = models.TextField(verbose_name='Location')
     nrecords = 0
     
     objects = models.Manager()

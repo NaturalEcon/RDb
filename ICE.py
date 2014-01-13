@@ -21,7 +21,7 @@ pk = 0
 date = '2011-01-01'
 loc = 'World'
 fields = ['name','subclass','name','valuetype','unit','valuetype','unit','valuetype','unit']
-nrows = 107
+nrows = 104
 #build dataframe
 df = pd.read_csv('ICE-adaptation.csv',header=0,skiprows=[0,2],nrows=nrows)
 df['MJ/kg'] = pd.Series(['MJ/kg']*nrows)
@@ -30,57 +30,103 @@ df['kgCO_2e/kg'] = pd.Series(['kgCO_2e/kg']*nrows)
 df['Form'] = df['Form'].fillna('')
 df['Type'] = df['Type'].fillna('')
 df = df.astype(str)
-S = []
-cols = df.columns
-fc = zip(fields,cols)
-st = '      \"'
-mi = '\":\"'
-en = '\",\n'
-S = []
-for f in fc:
-    if f[0] == 'valuetype':
-        S += [st+f[0]+mi+f[1]+en+st+'\"value'+mi+df[f[1]]+en]
-    else:
-        S += [st+f[0]+mi+df[f[1]]+en]
-D = pd.DataFrame(S).transpose()
-
+S = pd.Series(range(nrows))
+S = S.astype(str)
 f = open('ICE-MC-json.js','w')
+## Section 1: Material,Type,Form,EE,MJ/kg,EC,kgCO_2/kg,ECe,kgCO_2e/kg
+# Initial write
 f.write('[\n')
-f.writelines('{\"model\":\"NEMaterialClass\",\"pk\":\"###\",\"fields\":{\"name\":\"'+
+f.writelines('{\"model\":\"NEMaterialClass\",\"pk\":\"'+S+'\",\"fields\":{\"name\":\"'+
         df['Material']+'\",\"subtype\":\"'+df['Type']+'\"}},\n')
 f.write('@@@\n')
-f.writelines('{\"model\":\"NEMaterial\",\"pk\"###\",\"fields\":{\"name\":\"'+
-        df['Form']+'\",\"mclass\":\"###\"}},\n')
+f.writelines('{\"model\":\"NEMaterial\",\"pk\":\"'+S+'\",\"fields\":{\"name\":\"'+
+        df['Form']+'\",\"mclass\":\"'+S+'\"}},\n')
+f.write('@@@\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"EE\",\"value\":\"'+df['EE']+'\",\"unit\":\"'+df['MJ/kg']+
+        '\",\"startdate\":\"'+date+'\",\"infotype\":\"u\"}},\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"EC\",\"value\":\"'+df['EC']+'\",\"unit\":\"'+df['kgCO_2/kg']+
+        '\",\"startdate\":\"'+date+'\",\"infotype\":\"u\"}},\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"ECe\",\"value\":\"'+df['ECe']+'\",\"unit\":\"'+df['kgCO_2e/kg']+
+        '\",\"startdate\":\"'+date+'\",\"infotype\":\"u\"}},\n')   
+## Section 2: Material,Type,Form,EE,MJ/kg,EC,kgCO_2/kg,EC,kgCO_2e/kg,FE,MJ/kg
+# Create new dataframe
+nrows = 29
+skiprows = range(109)
+skiprows += [112]
+df = pd.read_csv('ICE-adaptation.csv',header=0,skiprows=skiprows,nrows=nrows)
+df['MJ/kg'] = pd.Series(['MJ/kg']*nrows)
+df['kgCO_2/kg'] = pd.Series(['kgCO_2/kg']*nrows)
+df['kgCO_2e/kg'] = pd.Series(['kgCO_2e/kg']*nrows)
+df['Form'] = df['Form'].fillna('')
+df['Type'] = df['Type'].fillna('')
+df = df.astype(str)
+S = pd.Series(range(nrows))
+S = S.astype(str)
+# Initial write
+f.writelines('{\"model\":\"NEMaterialClass\",\"pk\":\"'+S+'\",\"fields\":{\"name\":\"'+
+        df['Material']+'\",\"subtype\":\"'+df['Type']+'\"}},\n')
+f.write('@@@\n')
+f.writelines('{\"model\":\"NEMaterial\",\"pk\":\"'+S+'\",\"fields\":{\"name\":\"'+
+        df['Form']+'\",\"mclass\":\"'+S+'\"}},\n')
+f.write('@@@\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"EE\",\"value\":\"'+df['EE']+'\",\"unit\":\"MJ/kg'+
+        '\",\"startdate\":\"'+date+'\",\"infotype\":\"u\",\"location\":\"World\"}},\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"EC\",\"value\":\"'+df['EC']+'\",\"unit\":\"kgCO_2/kg'+
+        '\",\"startdate\":\"'+date+'\",\"infotype\":\"u\",\"location\":\"World\"}},\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"ECe\",\"value\":\"'+df['ECe']+'\",\"unit\":\"kgCO_2e/kg\"'+
+        ',\"startdate\":\"'+date+'\",\"infotype\":\"u\",\"location\":\"World\"}},\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"FE\",\"value\":\"'+df['FE']+'\",\"unit\":\"MJ/kg\"'+
+        ',\"startdate\":\"'+date+'\",\"infotype\":\"u\",\"location\":\"World\"}},\n')
+# Section 3:
+# Create new dataframe
+nrows = 67
+skiprows = range(143)
+skiprows += [145]
+df = pd.read_csv('ICE-adaptation.csv',header=0,skiprows=skiprows,nrows=nrows)
+df['MJ/kg'] = pd.Series(['MJ/kg']*nrows)
+df['kgCO_2/kg'] = pd.Series(['kgCO_2/kg']*nrows)
+df['kgCO_2e/kg'] = pd.Series(['kgCO_2e/kg']*nrows)
+df['Product'] = df['Product'].fillna('')
+df['Type'] = df['Type'].fillna('')
+df = df.astype(str)
+S = pd.Series(range(nrows))
+S = S.astype(str)
+# Initial write
+f.writelines('{\"model\":\"NEMaterialClass\",\"pk\":\"'+S+'\",\"fields\":{\"name\":\"'+
+        df['Material']+'\",\"subtype\":\"'+df['Type']+'\"}},\n')
+f.write('@@@\n')
+f.writelines('{\"model\":\"NEProduct\",\"pk\":\"'+S+'\",\"fields\":{\"name\":\"'+
+        df['Product']+'\",\"mclass\":\"'+S+'\"}},\n')
+f.write('@@@\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"EE\",\"value\":\"'+df['EE']+'\",\"unit\":\"MJ/kg\"'+
+        ',\"startdate\":\"'+date+'\",\"infotype\":\"u\",\"location\":\"'+df['Location']+'\"}},\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"EC\",\"value\":\"'+df['EC']+'\",\"unit\":\"kgCO_2/kg\"'+
+        ',\"startdate\":\"'+date+'\",\"infotype\":\"u\",\"location\":\"'+df['Location']+'\"}},\n')
+f.writelines('{\"model\":\"NESurveyInfo\",\"pk\":\"'+S+'\",\"fields\":{\"resource\":\"'+
+        S+'\",\"valuetype\":\"ECe\",\"value\":\"'+df['ECe']+'\",\"unit\":\"kgCO_2e/kg\"'+
+        ',\"startdate\":\"'+date+'\",\"infotype\":\"u\",\"location\":\"'+df['Location']+'\"}},\n')
+# Add dependency for recycled ____
 f.write(']')
+
+# Clean
+
 f.close()
 f = open('ICE-MC-json.js','r')
-text = f.readlines()
-i = 0
+lines = f.readlines()
 output = []
-for t in text:
-    if t == '@@@\n':
-        i = 0
-    elif t.count('\"name\":\"\"') !=1:
-        output += [t.replace('###',str(i))]
-    i += 1
+for line in lines:
+    if line.count('\"name\":\"\"') < 1 and line.count('nan') < 1 and not line == '@@@\n':
+        output += [line]
 f.close()
 f = open('ICE-MC-json.js','w')
 f.writelines(output)
 f.close()
-#f.write('      \"subtype\":\"'+df['Type'])
-#dostuff
-#Process entire file at once
-#i = 0
-#models = []
-#pks = []
-#fields = []
-##nemc.name,nemc.child,nem.name,nesi.valuetype,nesi.unit,nesi.valuetype,nesi.unit,nesi.valuetype,nesi.unit
-##get list of number of fields for each model present
-#f = open('ICE-adaptation.csv','r')
-#text = f.readlines()
-#field_models = []
-#models = text[text.str.contains('###')]
-#models.index = pd.Index(range(models.count))
-#models = models.str[4:-1]
-#models = models.str.split(',')
-#k = 0
