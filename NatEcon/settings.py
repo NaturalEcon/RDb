@@ -30,7 +30,9 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+FIXTURE_DIRS = (
+    '/home/acumen/Documents/Sage/NatEcon/Initial-Data/',
+)
 # Application definition
 
 INSTALLED_APPS = (

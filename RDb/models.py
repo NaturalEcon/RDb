@@ -92,8 +92,8 @@ valuetypes = (
         ('MT','Mean time before failure'),
         ('MF','Maintenance-free Operating Period'),
         ('PR','Property Value'),
-        ('EC','Embodied Carbon')
-        ('ECe','Embodied Carbon Emitted')
+        ('EC','Embodied Carbon'),
+        ('ECe','Embodied Carbon Equivalent')
         )
     ),
 )
@@ -162,7 +162,7 @@ class NEResource(models.Model):
     # this required table.
     ##########################
     name = models.CharField(max_length=20)
-    long_name = models.CharField(max_length=128)
+    long_name = models.CharField(max_length=128,blank=True,default='')
     ##########################
     # R Classes:
     # R: Resource
@@ -200,17 +200,16 @@ class NEDependency(models.Model):
     def __unicode__(self):
         return self.__repr__()
         
-class NEMaterialClass(models.Model):
+class NEMaterialClass(NEMaterial):
     classname = models.CharField(max_length=64,verbose_name='Class Name')
-    subtype = models.CharField(max_length=64,blank=True,null=True)
     description = models.TextField(blank=True,default='')
     current_standard = models.ForeignKey('NEMaterial',related_name='std_of_material_class',
                                          blank=True,null=True,
                                          verbose_name='Current Standard')
-    members = models.ManyToManyField('NEMaterial',related_name='parent_class',
+    members = models.ManyToManyField('NEMaterial',related_name='parent_mclass',
                                          verbose_name='Member Materials')
-    subclasses = models.ManyToManyField('NEMaterialClass',related_name='superclass',
-                                         symmetrical=False,'Subclasses')
+    subclasses = models.ManyToManyField('NEMaterialClass',related_name='super_mclass',
+                                         symmetrical=False)
     objects = models.Manager()
     dataframe = DataFrameManager()
     
@@ -243,7 +242,7 @@ class NEMaterial(NEResource):
         verbose_name = 'Material'
     
     def __repr__(self):
-        return "Material %s, type %i" % (self.name,self.mclass)
+        return "Material %s" % (self.name)
     def __unicode__(self):
         return self.__repr__()
 
@@ -254,10 +253,10 @@ class NEProductClass(models.Model):
     current_standard = models.ForeignKey('NEProduct',related_name='std_of_product_class',
                                          blank=True,null=True,
                                          verbose_name='Current Standard')
-    members = models.ManyToManyField('NEProduct',related_name='parent_rclass',
+    members = models.ManyToManyField('NEProduct',related_name='parent_pclass',
                                          verbose_name='Member Products')
-    subclasses = models.ManyToManyField('NEMaterialClass',related_name='superclass',
-                                         symmetrical=False,'Subclasses')
+    subclasses = models.ManyToManyField('NEMaterialClass',related_name='super_pclass',
+                                         symmetrical=False)
     objects = models.Manager()
     dataframe = DataFrameManager()
 
@@ -291,13 +290,13 @@ class NEProduct(NEMaterial):
         return self.__repr__()        
 
 class NEProperty(models.Model):
-    rid = models.ForeignKey('NEResource',related_name='property_rsc',
+    resource = models.ForeignKey('NEResource',related_name='property_rsc',
                             blank=True,null=True,
                             verbose_name='Resource')
-    pid = models.ForeignKey('NEProcess',related_name='property_pro',
+    process = models.ForeignKey('NEProcess',related_name='property_pro',
                             blank=True,null=True,
                             verbose_name='Process')
-    aid = models.ForeignKey('NEActor',related_name='property_act',
+    actor = models.ForeignKey('NEActor',related_name='property_act',
                             blank=True,null=True,
                             verbose_name='Actor')
     name = models.CharField(max_length=50)
@@ -398,14 +397,14 @@ class NESurveyValue(models.Model):
     resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='surveyvalue_rsc')
     process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='surveyvalue_proc')
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='surveyvalue_act')
+    prop = models.ForeignKey('NEProperty',blank=True,null=True,related_name='surveyvalue_prp')
     # UNIX time of observation
     date = models.DateField()
     # Value type.  See static 'valuetypes' definition for documentation.    
     valuetype = models.CharField(max_length=3,choices=valuetypes)
     value = models.FloatField()
     unit = models.CharField(max_length=10)
-    # If this is about a property of a resource, put the property here.
-    prop_pointer = models.ForeignKey('NEProperty',blank=True,null=True,
+    with_property = models.ForeignKey('NEProperty',blank=True,null=True,
                                      related_name='property_data',verbose_name='Property')
     # Location of the survey; May be replaced with "energy distance"
     location = models.TextField(verbose_name='Location')
@@ -449,9 +448,10 @@ class NESurveyInfo(models.Model):
     process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='surveyinfo_proc')
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='surveyinfo_act')
     startdate = models.DateField()
-    enddate = models.DateField(blank=True,default=startdate)
+    enddate = models.DateField(blank=True,default='2050-01-01')
     value = models.FloatField()
     valuetype = models.CharField(max_length=3,choices=valuetypes)
+    unit = models.CharField(max_length=10)
     infotype = models.CharField(max_length=1,choices=infotypes)
     records = models.ManyToManyField('NECitation',through='NEInfoCitation',
                                      related_name='cited_by',symmetrical=True)
@@ -459,6 +459,9 @@ class NESurveyInfo(models.Model):
     nrecords = 0
     
     objects = models.Manager()
+    resources = ResourceSurveyManager()
+    processes = ProcessSurveyManager()
+    actors = ActorSurveyManager()
     dataframe = DataFrameManager()    
     
     class Meta:
@@ -496,13 +499,11 @@ class NESurveyInfo(models.Model):
         if self.actor is not None:
             sinq = "Actor: "
             inq = self.actor
-        start = sinq + "%i Value: %5.2f Type: %s Start time: %s End time: %s" \
+        start = sinq + "%s Value: %5.2f Type: %s Start time: %s End time: %s" \
             % (inq,self.value, self.infotype,self.startdate.strftime("%Y"),self.enddate.strftime("%Y"))
-        if self.loc is not None: l = "\n Location: %s" % self.loc
+        if self.location is not None: l = "\n Location: %s" % self.location
         else: l = "No Location"
-        if self.ref is not None: ref = "\n Reference: %s" % self.ref
-        else: ref = "Unsourced"
-        return str(start+l+ref)
+        return str(start+l)
     def __unicode__(self):
         return self.__repr__()
 

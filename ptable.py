@@ -32,17 +32,18 @@ e2elem = { "t":"Time",
     "Ac":"Actinium","Th":"Thorium","Pa":"Protactinium","U":"Uranium","Np":"Neptunium","Pu":"Plutonium","Am":"Americium","Cm":"Curium","Bk":"Berkelium","Cf":"Californium","Es":"Einsteinium","Fm":"Fermium","Md":"Mendelevium","No":"Nobelium",
     "Lr":"Lawrencium","Rf":"Rutherfordium","Db":"Dubnium","Sg":"Seaborgium","Bh":"Bohrium","Hs":"Hassium","Mt":"Meitnerium","Ds":"Darmstadtium","Rg":"Roentgenium","Cn":"Copernicum","Uut":"Ununtrium","Fl":"Flerovium","Uup":"Ununpentium","Lv":"Livermorium","Uus":"Ununseptium","Uuo":"Ununoctium",
     "e":"Energy"}
-model = 'NEResource'
+model = 'RDb.NEResource'
 js = []
 for i in range(len(periodictable)):
     pt = periodictable[i]
-    js += ['  {\n    \"model\":\"'+model+'\",\n    \"pk\":\"'+str(i)+
-        '\",\n    \"fields\": {\n      \"name\":\"'+pt+'\",\n      \"long_name\":\"'+
-        e2elem[pt]+'\"\n    }\n  },']
+    js += ['{\"model\":\"'+model+'\",\"pk\":'+str(i)+
+        ',\"fields\":{\"name\":\"'+pt+'\",\"long_name\":\"'+
+        e2elem[pt]+'\"}}']
 jstring = ''
-for j in js:
-    jstring += j+'\n'
-f = open('ptable-json.js','w')
+for j in js[:-1]:
+    jstring += j+',\n'
+jstring +=js[-1]
+f = open('Initial-Data/ptable.json','w')
 f.write('[\n')
 f.writelines(jstring)
 f.write(']')

@@ -1,0 +1,161 @@
+nem.pk	nem.name	nem.mclass
+120	Water	120
+123	Lithium	123
+133	Aluminum	133
+142	Titanium	142
+143	Vanadium	143
+144	Chromium	144
+145	Manganese	145
+146	Iron	146
+148	Nickel	148
+150	Zinc	150
+159	Yttrium	159
+162	Molybdenum	162
+167	Silver	167
+170	Tin	170
+200	Mercury	200
+202	Lead	202
+241	Aggregate	241
+242	Asbestos	242
+243	Asphalt	243
+244	Bitumen	244
+245	Brass	245
+249	Carpet	249
+251	Cement	251
+252	Ceramics	252
+253	Clay	253
+254	Concrete	254
+256	Damp Proof Course	256
+257	Felt	257
+259	Flax	259
+260	Fly Ash	260
+270	GGBS	270
+272	Grit	272
+275	Insulation	275
+276	Lime	276
+278	Linoleum	278
+280	Mandolite	280
+285	Paint	285
+289	Plastic	289
+292	Rubber	292
+293	Sand	293
+296	Soil	296
+297	Steel	297
+298	Stone	298
+299	Straw	299
+302	Timber	302
+304	Vicuclad	304
+305	Wax	305
+306	Wood Stain	306
+306	Zirconium	306
+54358	Steel Plate	297
+138036	Steel Pipe	297
+146269	Wallpaper	286
+146843	Urea Formaldehyde	294
+159216	DN 200	253
+161426	Rockwool	275
+162152	Polypropylene	289
+163683	HDPE	289
+164571	1:2:9 Cement:Lime:Sand	283
+170234	28/35MPa	254
+176864	1:1:6 Cement:Lime:Sand	283
+181274	20/25MPa	254
+182567	Polyurethane	289
+185431	OSB	258
+188262	Natural Vermiculite	303
+188373	LDPE	289
+190870	Steel Rod	297
+195046	Polycarbonate	289
+196716	Saturated Felt Carpet Underlay	249
+201058	Slate	298
+202186	Rolled Aluminum	133
+202312	1:4 Cement:Sand	283
+203427	Galvanized Steel Coil	297
+204812	Waterborne Paint	285
+206265	16/20MPa	254
+208200	Ceramic	252
+208222	Engineering Steel	297
+209999	Phenol Formaldehyde	294
+214175	Fiber Cement	251
+214852	DN 300	253
+216106	Solventborne Paint	285
+216758	1:0.5:4.5 Cement:Lime:Sand	283
+221640	Stabilized	296
+229668	1:5 Cement:Sand	283
+233218	Carpet	250
+233218	Carpet	273
+233375	Plaster Board	288
+237673	Laminated Veneer	279
+248586	Expanded Vermiculite	303
+249614	Expanded Perlite	287
+255747	DN 150	253
+256169	Flax	275
+257992	Primary Glass	271
+259486	PVC	289
+259486	PVC	289
+261153	1:3 Cement:Sand	283
+267450	Wool	275
+278722	ABS	289
+281546	Limestone	298
+286270	Calcium Silicate	
+287224	Hardboard	258
+288628	Polycrystalline Silicon	290
+291150	1:6 Cement:Sand	283
+291356	Bronze	247
+295010	Quartz Powder	291
+297206	Polyurethane Carpet	249
+301776	Paper Wool	275
+303924	DN 100	253
+307986	Fiberglass	271
+315756	Polypropylene Carpet	249
+322119	CEM III	251
+326916	Shale	298
+330371	Polyethylterephtalate Carpet	249
+336662	Glue Laminated	279
+337396	Polyethylene	289
+341659	Cellulose	275
+345787	Cork	275
+346022	Cellular Glass	275
+353009	CEM II	251
+353203	DN 500	253
+357020	Silicon	154
+360511	Fine Paper	286
+361309	Plywood	258
+361665	Wool Carpet	249
+361893	6 Polymer	284
+365340	Mastic	294
+365479	Marble	298
+365711	Toughened Glass	271
+366277	Steel Wire	297
+371120	Sawn	274
+371120	Sawn Softwood	295
+371828	Thin Film Silicon	301
+371927	Melamine	294
+373107	Coated Tin	170
+377047	Steel Coil	297
+377996	MDF	258
+380935	Limestone Bricks	246
+381684	Epoxide	294
+384456	Copper Tube	149
+388379	Glass-reinforced Plastic	289
+388814	Rubber Carpet	249
+393793	Nylon Carpet	243
+393793	Natural Perlite	287
+393793	Gypsum Plaster	288
+405537	Felt Carpet	243
+409043	Ground Limestone	277
+409179	Stainless Steel	297
+409588	CEM I	251
+412056	Monocrystalline Silicon	282
+415512	32/40MPa	254
+415859	Particle Board	258
+415984	40/50MPa	254
+418185	Polystyrene	289
+423324	Sandstone	298
+424974	UPVC	289
+428735	Mineral Wool	275
+429261	Woodwool	275
+429466	25/30MPa	254
+430859	Secondary Glass	271
+432499	Granite	298
+436672	Steel Section	297
