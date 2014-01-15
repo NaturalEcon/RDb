@@ -195,6 +195,10 @@ class ResourceSurveyManager(models.Manager):
     def get_queryset(self):
         return super(ResourceSurveyManager, self).get_queryset().exclude(resource__exact=None)
 
+class CollectionSurveyManager(models.Manager):
+    def get_queryset(self):
+        return super(CollectionSurveyManager, self).get_queryset().exclude(collection__exact=None)
+
 class ProcessSurveyManager(models.Manager):
     def get_queryset(self):
         return super(ProcessSurveyManager, self).get_queryset().exclude(process__exact=None)

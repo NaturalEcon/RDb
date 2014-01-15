@@ -1,37 +1,28 @@
-12 January 2014: CSV Translation of ICE Database
+15 January 2014: Database population, refactoring of models
 
-After being advised that I was unnecessarily introducing complexity by using JSON for the ICE database, I've switched to editing the CSV directly.  Everything from the ICE summary table is complete.  I will be working on establishing dependencies and filling in the detail data next.
+I've started intensely focusing on creating a resource taxonomy, as it is highlighting faults in the models I've created.  There is now a collection of CSV files with a not insignificant amount of data in them.  I will soon be writing a script to load all the CSV data into the Django Db, but for now I'm editing them directly in a spreadsheet program until most of the faults in my modeling are found.  Once I am able to migrate data into new models, I will focus on the data entry interface more.  I'm still not clear on whether or not primary keys created for a subclass share the same keyspace with the superclass, and if not I will have to manually control PK creation.  For now, I'm manually entering PKs in my CSV tables.
+
+I've eliminated the Material and Product classes in favor of having parent/child M2M fields for Materials and Products themselves, to simplify things.  This changes the terminology so that a "material class"/"product class" is a non-leaf node, and a "material"/"product" is a leaf node.  However, because a subclass/superclass is not identical to a backward/forward dependency, I have kept the dependency.  Subclassing may be added to NEProperty later on, but since I have very little data about resource properties, I'm not concerning myself with it yet.  
+Also recognizing that sometimes a study is about only a certain subset of a class of products/materials, I have created the NECollection class, which is a named collection of resources, processes, or actors, e.g. "Gen II and III+ Nuclear Reactors".
+
+A number of changes have been made to the NESurvey classes:
+-Collections have been added as an ABOUT field for NESurveyInfo, and a corresponding manager created.  This changes NESI's role from being simply for meta-studies and statistical information to generally being about collections (of either data or ABOUTs)
+-A relationship field has been added, to reflect the fact that a value can involve two ABOUTs (e.g. demand for resource X by process Y).  A second 'resource' ABOUT field may need to be added later for dependencies with variance.  Alternatively, I may just create a separate dependency survey class.  For now the database will just contain the information, without the application having much use for it.
+-The "with_property" field has been removed from NESurveyValue, as it didn't seem particularly useful, and was probably something I put in while drunk.  However, a "prop"[erty] field has been added as an ABOUT field.
+-Description fields have been added to the Survey classes, as well as most other classes.  It is a necessity for the Survey classes, and helpful for the others in database population and saving information to expand on later (e.g. chemical formulas of materials that can later be turned into dependency entries)
 
 # On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
-#	new file:   ICE-references.ods
-#	modified:   ICE.py
-#	new file:   Initial-Data/ICE-C.csv
-#	new file:   Initial-Data/ICE-M.csv
-#	new file:   Initial-Data/ICE-MC.csv
-#	new file:   Initial-Data/ICE-MD.csv
-#	new file:   Initial-Data/ICE-P.csv
-#	new file:   Initial-Data/ICE-PC.csv
-#	new file:   Initial-Data/ICE-PR.csv
-#	new file:   Initial-Data/ICE-SI.csv
-#	new file:   Initial-Data/ID.backup.7z
-#	new file:   Initial-Data/ptable.json
-#	modified:   NatEcon/settings.py
-#	modified:   RDb/admin.py
-#	modified:   RDb/models.py
-#	new file:   Templates/units.txt
-#	modified:   nedb.sqlite3
-#	modified:   ptable.py
-#
-# Changes not staged for commit:
-#   (use "git add/rm <file>..." to update what will be committed)
-#   (use "git checkout -- <file>..." to discard changes in working directory)
-#
-#	deleted:    ICE-MC-json.js
-#	deleted:    ICE-adaptation.csv
-#	deleted:    SupportingFiles/aggregate.csv
-#	deleted:    SupportingFiles/aggregates.csv
+#	new file:   Initial-Data/.~lock.pclasses.csv#
+	modified:   Initial-Data/ICE-M.csv
+	modified:   Initial-Data/ICE-MC.csv
+	modified:   Initial-Data/ICE-SI.csv
+	new file:   Initial-Data/metals-surveys.csv
+	new file:   Initial-Data/pclasses.csv
+	modified:   RDb/managers.py
+	modified:   RDb/models.py
 #	modified:   commit_msg.txt
+#	modified:   nedb.sqlite3
 #
