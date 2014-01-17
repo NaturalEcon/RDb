@@ -1,28 +1,43 @@
-15 January 2014: Database population, refactoring of models
+16 January 2014: Refactoring of models, rekeying of data
 
-I've started intensely focusing on creating a resource taxonomy, as it is highlighting faults in the models I've created.  There is now a collection of CSV files with a not insignificant amount of data in them.  I will soon be writing a script to load all the CSV data into the Django Db, but for now I'm editing them directly in a spreadsheet program until most of the faults in my modeling are found.  Once I am able to migrate data into new models, I will focus on the data entry interface more.  I'm still not clear on whether or not primary keys created for a subclass share the same keyspace with the superclass, and if not I will have to manually control PK creation.  For now, I'm manually entering PKs in my CSV tables.
-
-I've eliminated the Material and Product classes in favor of having parent/child M2M fields for Materials and Products themselves, to simplify things.  This changes the terminology so that a "material class"/"product class" is a non-leaf node, and a "material"/"product" is a leaf node.  However, because a subclass/superclass is not identical to a backward/forward dependency, I have kept the dependency.  Subclassing may be added to NEProperty later on, but since I have very little data about resource properties, I'm not concerning myself with it yet.  
-Also recognizing that sometimes a study is about only a certain subset of a class of products/materials, I have created the NECollection class, which is a named collection of resources, processes, or actors, e.g. "Gen II and III+ Nuclear Reactors".
-
-A number of changes have been made to the NESurvey classes:
--Collections have been added as an ABOUT field for NESurveyInfo, and a corresponding manager created.  This changes NESI's role from being simply for meta-studies and statistical information to generally being about collections (of either data or ABOUTs)
--A relationship field has been added, to reflect the fact that a value can involve two ABOUTs (e.g. demand for resource X by process Y).  A second 'resource' ABOUT field may need to be added later for dependencies with variance.  Alternatively, I may just create a separate dependency survey class.  For now the database will just contain the information, without the application having much use for it.
--The "with_property" field has been removed from NESurveyValue, as it didn't seem particularly useful, and was probably something I put in while drunk.  However, a "prop"[erty] field has been added as an ABOUT field.
--Description fields have been added to the Survey classes, as well as most other classes.  It is a necessity for the Survey classes, and helpful for the others in database population and saving information to expand on later (e.g. chemical formulas of materials that can later be turned into dependency entries)
+The keyspace I initially started with is going to be far too small, so I decided to rekey the database early on while it's still manageable.  UUIDs will now be used as keys for resources, and perhaps processes and actors, as well.  This introduces a dependency on the python UUID library, but as it is built in, that should not present any problems.  Upon realizing that the data model still has problems sharing keys, the model has been further simplified to:
+NEResource now covers all resources without subclassing.
+NESubclass has been created as a M2M table for NER's new attribute.
+NECollection has been extended to all three types of monoids (resource, process, actor).
+All M2M table classes now have a field for the monoid's name, to increase readability.
 
 # On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
-#	new file:   Initial-Data/.~lock.pclasses.csv#
-	modified:   Initial-Data/ICE-M.csv
-	modified:   Initial-Data/ICE-MC.csv
-	modified:   Initial-Data/ICE-SI.csv
-	new file:   Initial-Data/metals-surveys.csv
-	new file:   Initial-Data/pclasses.csv
-	modified:   RDb/managers.py
-	modified:   RDb/models.py
-#	modified:   commit_msg.txt
+#	modified:   Initial-Data/ID.backup.7z
+#	new file:   Initial-Data/elements-uids.txt
+#	new file:   Initial-Data/necol.csv
+#	new file:   Initial-Data/necol.json
+#	new file:   Initial-Data/ned.csv
+#	new file:   Initial-Data/ned.json
+#	new file:   Initial-Data/nem.csv
+#	new file:   Initial-Data/nem.json
+#	new file:   Initial-Data/nep.csv
+#	new file:   Initial-Data/nep.json
+#	new file:   Initial-Data/nesc.csv
+#	new file:   Initial-Data/nesc.json
+#	new file:   Initial-Data/nesi.csv
+#	new file:   Initial-Data/nesi.json
+#	new file:   Initial-Data/pks.txt
+#	modified:   Initial-Data/ptable.json
+#	modified:   RDb/admin.py
+#	modified:   RDb/models.py
+#	new file:   initial-data.py
 #	modified:   nedb.sqlite3
+#	modified:   ptable.py
+#
+# Changes not staged for commit:
+#   (use "git add/rm <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	deleted:    ICE.py
+#	deleted:    Initial-Data/.~lock.pclasses.csv#
+#	deleted:    Initial-Data/pclasses.csv
+#	modified:   commit_msg.txt
 #

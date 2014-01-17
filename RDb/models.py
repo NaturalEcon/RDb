@@ -143,39 +143,17 @@ ctypes = (
     ('B','Book'),('M','Memo')
 )
 atypes = ( ('org','Organization'),('ogn','Organism'),('sys','System'),('hom','Person') )
+
 class NEResource(models.Model):
-    ##########################
-    # ID namespace:
-    # 0:       Time
-    # 1-118:   Elements by atomic number
-    # 119:     Energy
-    # 120-256: Top 136 most abundant materials
-    # ID is a 6-character hex code, giving the possibility for up to 
-    # 16,777,216 different resources in the database.
-    # Size of fully-populated NEResource table: 432MiB
-    ##########################
-    # NEResource names:
-    # Please try to stay within 20 characters.  If the name is longer, it will
-    # be replaced with a longname ID, which will point to a row in a table of 
-    # long names.  This is done to speed up searching and reduce the size of
-    # this required table.
-    ##########################
+    id = models.CharField(max_length=40,primary_key=True)
     name = models.CharField(max_length=64)
     short_name = models.CharField(max_length=16,blank=True,default='')
     long_name = models.CharField(max_length=128,blank=True,default='')
-    ##########################
-    # R Classes:
-    # R: Resource
-    # M: Material
-    # P: Product
-    # S: Service
-    # D: Data
-    ##########################
-    rclass = models.CharField(max_length=1,choices=rclasses,
-                              blank=True,default='R',
-                              verbose_name='Resource Class')
-    deps = models.ManyToManyField('NEResource', related_name='fdep',through='NEDependency',
-                                         symmetrical=False,verbose_name='Dependency')
+    description = models.TextField()
+    dependencies = models.ManyToManyField('NEResource', related_name='fdep',
+                                          through='NEDependency', symmetrical=False)
+    subclasses   = models.ManyToManyField('NEResource', related_name='superclass',
+                                          through='NESubclass', symmetrical=False)                                         
     objects = models.Manager()
     dataframe = DataFrameManager()
     
@@ -186,101 +164,24 @@ class NEResource(models.Model):
         return self.name
     def __unicode__(self):
         return self.__repr__()
+
         
-    
-class NECollection(models.Model):
-    collection_id = models.IntegerField(verbose_name='Collection ID')
-    resource = models.ForeignKey(NEResource, related_name='rcollections',null=True,blank=True)
-    process = models.ForeignKey('NEProcess', related_name='pcollections',null=True,blank=True)
-    actors = models.ForeignKey('NEActor', related_name='acollections',null=True,blank=True)
-    name = models.TextField(max_length=32,verbose_name='Collection name')
-    class Meta:
-        verbose_name= 'Resource Collection'
-        verbose_name_plural = 'Resource Collections'
-        unique_together = (('collection_id','resource'),('collection_id','process'),('collection_id','actors'),)
-        
-    def __repr__(self):
-        return "Collection: %i, %s\n" % \
-            (self.collection_id,self.resource.name)
-    def __unicode__(self):
-        return self.__repr__()
-    
-class NEDependency(models.Model):
-    parent_resource = models.ForeignKey(NEResource,related_name='forward_dependency')
-    dependency = models.ForeignKey(NEResource,related_name='backward_dependency')
-    dependency_mult = models.FloatField(default=1.0,verbose_name='Dependency Multiplicity')
+#NE Actor is the base class for organisms, organizations, and complex systems.
+class NEActor(models.Model):
+    name = models.CharField(max_length=30)
+    children = models.ManyToManyField('NEActor',related_name='actor_parents',blank=True,null=True)
+    atype = models.CharField(max_length=3,choices=atypes)
+
+    members = models.ManyToManyField('NEResource', related_name='group',
+                                          through='NECollection',symmetrical=False) 
     
     class Meta:
-        verbose_name_plural = 'Dependencies'
-        unique_together = (('parent_resource','dependency'),)
-    
-    def __repr__(self):
-        return "%5.2f x %s" % (self.dependency_mult, self.dependency)
-    def __unicode__(self):
-        return self.__repr__()
-        
-        
-class NEMaterial(NEResource):
-    description = models.TextField(blank=True,default='')
-    current_standard = models.ForeignKey('NEMaterial',related_name='std_of_material_class',
-                                         blank=True,null=True,
-                                         verbose_name='Current Standard')
-    mchildren = models.ManyToManyField('NEMaterial',related_name='mparents',
-                                         symmetrical=False,verbose_name='Child Materials')
-    objects = models.Manager()
-    dataframe = DataFrameManager()
-    
-    class Meta:
-        verbose_name = 'Material'
-    
-    def __repr__(self):
-        return self.name
-    def __unicode__(self):
-        return self.__repr__()
-    
+        verbose_name = 'Actor'
 
-class NEProduct(NEResource):
-    description = models.TextField(blank=True,default='')
-    pchildren = models.ManyToManyField('NEProduct',related_name='pparents',
-                                         verbose_name='Child Products', symmetrical=False)
-    objects = models.Manager()
-    dataframe = DataFrameManager()
-
-    class Meta:
-        verbose_name = 'Product'        
-    
-    def __repr__(self):
-        return self.name
-    def __unicode__(self):
-        return self.__repr__()     
-
-
-class NEProperty(models.Model):
-    resource = models.ForeignKey('NEResource',related_name='property_rsc',
-                            blank=True,null=True,
-                            verbose_name='Resource')
-    process = models.ForeignKey('NEProcess',related_name='property_pro',
-                            blank=True,null=True,
-                            verbose_name='Process')
-    actor = models.ForeignKey('NEActor',related_name='property_act',
-                            blank=True,null=True,
-                            verbose_name='Actor')
-    name = models.CharField(max_length=50)
-    unit = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name = 'Property'
-        verbose_name_plural = 'Properties'
-    
-    def __repr__(self):
-        return '%s of %s: %f %s' % (self.name,self.rid,self.value,self.unit)
-    def __unicode__(self):
-        return self.__repr__()
-        
         
 # NE Process represents an industrial process or (limited scale) natural process.
 class NEProcess(models.Model):
-    pname = models.CharField(max_length=30,verbose_name='Process name')
+    pname = models.CharField(max_length=64,verbose_name='Process name')
     ptype = models.CharField(max_length=1,choices=ptypes,verbose_name='Process type')
     io = models.ManyToManyField( NEResource,through='NEProcessIO',symmetrical=False,
                                 verbose_name='Inputs/Outputs',related_name='relevant_processes')
@@ -292,29 +193,82 @@ class NEProcess(models.Model):
         verbose_name = 'Process'
         verbose_name_plural = 'Processes'
 
-    def addNewIO(self,argid=None,argweight=None,argtype=None):
-        if argid == None:
-            raise ValueError("You must specify a resource.")
-        if argweight == None:
-            raise ValueError("You must specify a weight.")
-        if argtype == 'I':
-            argtype='I'
-        elif argtype == 'O':
-            argtype='O'
-        self.inputs += [NEProcessIO(pid=self,argid=argid,argweight=argweight,argtype=argtype)]
-    
     def __repr__(self):
         return "%s (Type %s)\n Inputs: %s \n Outputs: %s" % (self.pname,self.ptype,self.inputs,self.outputs)
-            
+
+class NEProperty(models.Model):
+    pname = models.CharField(max_length=64,verbose_name='Property name')
+    description = models.TextField()
+    value = models.FloatField()
+    error = models.FloatField()
+
+# An adjacency table for NE Process inputs and outputs
 class NEProcessIO(models.Model):
     pid = models.ForeignKey(NEProcess,related_name='process',verbose_name='Process')
-    argid = models.ForeignKey(NEResource,related_name='process_arg',verbose_name='Argument')
-    argweight = models.FloatField(default=1.0,verbose_name='Argument weight')
-    argtype = models.CharField(max_length=1,choices=argtypes,verbose_name='Argument type')
+    pname = models.CharField(max_length=64)
+    arg_id = models.ForeignKey(NEResource,related_name='process_arg',verbose_name='Argument')
+    arg_name = models.CharField(max_length=64,verbose_name='Argument Name')
+    arg_weight = models.FloatField(default=1.0,verbose_name='Argument weight')
+    arg_type = models.CharField(max_length=1,choices=argtypes,verbose_name='Argument type')
     class Meta:
         verbose_name = 'Process IO'
         verbose_name_plural = 'Process IO'
+    
+    def __repr__(self):
+        return '%s: %f x %s' % (self.pname,self.arg_weight,self.arg_name)
+    def __unicode__(self):
+        return self.__repr__()
 
+# A collection of resources, processes, or actors.        
+class NECollection(models.Model):
+    collection_id = models.IntegerField(verbose_name='Collection ID')
+    collection_name = models.TextField(max_length=32,verbose_name='Collection name')
+    resource = models.ForeignKey(NEResource, related_name='rcollections',null=True,blank=True)
+    resource_name = models.CharField(max_length=64)
+    process = models.ForeignKey('NEProcess', related_name='pcollections',null=True,blank=True)
+    process_name = models.CharField(max_length=64)
+    actor = models.ForeignKey('NEActor', related_name='acollections',null=True,blank=True)
+    actor_name = models.CharField(max_length=64)
+
+    class Meta:
+        verbose_name= 'Resource Collection'
+        verbose_name_plural = 'Resource Collections'
+        unique_together = (('collection_id','resource'),('collection_id','process'),('collection_id','actor'),)
+        
+    def __repr__(self):
+        return "Collection: %i, %s%s%s\n" % \
+            (self.collection_id,self.resource_name,self.process_name,self.actor_name)
+    def __unicode__(self):
+        return self.__repr__()
+
+# An adjacency table for the composition of a complex resource    
+class NEDependency(models.Model):
+    parent_resource = models.ForeignKey(NEResource,related_name='forward_dependency')
+    parent_name = models.CharField(max_length=64)
+    dependency = models.ForeignKey(NEResource,related_name='backward_dependency')
+    dependency_name = models.CharField(max_length=64)
+    dependency_mult = models.FloatField(default=1.0,verbose_name='Dependency Multiplicity')
+    
+    class Meta:
+        verbose_name_plural = 'Dependencies'
+        unique_together = (('parent_resource','dependency'),)
+    
+    def __repr__(self):
+        return "%s requires %5.2f x %s" % (self.parent_name,self.dependency_mult,self.dependency_name)
+    def __unicode__(self):
+        return self.__repr__()
+
+# An adjacency table for classification
+class NESubclass(models.Model):
+    parent_class = models.ForeignKey(NEResource,related_name='parent_class')
+    parent_name = models.CharField(max_length=64)
+    child_class = models.ForeignKey(NEResource,related_name='child_class')
+    child_name = models.CharField(max_length=64)
+    description = models.TextField()
+
+    def __repr__(self):
+        return 'Superclass: %s\nSubclass: %s' % (self.parent_name,self.child_name)
+        
 # NE Citation is a simple research citation class until I implement Zotero support.
 #  Because it is not intended to be in the project long-term, it will be limited to only
 #   a few types.        
@@ -344,8 +298,7 @@ class NECitation(models.Model):
         return self.__repr__()        
         
         
-# NESurveyValue is intended to represent a single data point about a resource, process,
-# actor, or property.
+# NESurveyValue is intended to represent a single data point about a resource, process, or actor
 class NESurveyValue(models.Model):
     ###############################
     # ABOUT fields    
@@ -356,7 +309,6 @@ class NESurveyValue(models.Model):
     resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='surveyvalue_rsc')
     process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='surveyvalue_proc')
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='surveyvalue_act')
-    prop = models.ForeignKey('NEProperty',blank=True,null=True,related_name='surveyvalue_prp')
     # UNIX time of observation
     date = models.DateField()
     # Relationship is used for rows that contain data in two or more of the first four columns.
@@ -382,22 +334,7 @@ class NESurveyValue(models.Model):
         verbose_name = 'Survey Value'
         
     def __repr__(self):
-        sinq = ""
-        inq = None
-        if self.resource is not None:
-            sinq = "Resource: "
-            inq = self.resource
-        if self.process is not None:
-            sinq = "Process: "
-            inq = self.process
-        start = sinq + "%s\n Year: \n Type: %s\n Value: %5.2f%s \n" \
-            % (inq,self.valuetype,self.value,self.unit,self.loc,self.ref)
-        if self.loc != None: l = "\n Location: %s" % self.loc
-        else: l = "No Location"
-        if self.ref != None: ref = "\n Reference: %s" % self.ref
-        else: ref = "\n Unsourced"
-        return str(start+l+ref)
-        
+        return '%s(%s %s %s): %f %s' % (self.valuetype,self.resource,self.relationship,self.collection,self.value,self.unit)    
     def __unicode__(self):
         return self.__repr__()
    
@@ -420,7 +357,7 @@ class NESurveyInfo(models.Model):
     relationship = models.CharField(max_length=6,default='Improperly Entered Row')    
     description = models.TextField(blank=True,null=True)
     
-    startdate = models.DateField()
+    startdate = models.DateField(blank=True,default='2049-12-31')
     enddate = models.DateField(blank=True,default='2050-01-01')
     
     value = models.FloatField()
@@ -443,48 +380,12 @@ class NESurveyInfo(models.Model):
     class Meta:
         verbose_name = 'Survey Info'
         verbose_name_plural = 'Survey Info'    
-        
-    
-    def setRecords(self,records):
-        rtype = type(records[0])
-        refs = []
-        if rtype == NEInfoCitation:
-            self.records = records
-            self.nrecords = records.nrecords
-            return self.records
-        if rtype == NECitation:
-            for r in records:
-                refs += [NEInfoCitation(iid=self, cid=r)]
-            self.nrecords = len(refs)
-        if rtype == NESurveyValue:
-            for r in records:
-                refs += [NEInfoCitation(cid=r.ref)]
-            self.nrecords = len(refs)
-        return refs
-
     
     def __repr__(self):
-        sinq = ""
-        inq = None
-        if self.resource is not None:
-            sinq = "Resource: "
-            inq = self.resource
-        if self.process is not None:
-            sinq = "Process: "
-            inq = self.process
-        if self.actor is not None:
-            sinq = "Actor: "
-            inq = self.actor
-        if self.collection is not None:
-            sinq = "Collection: "
-            inq = self.collection
-        start = sinq + "%s Value: %5.2f Type: %s Start time: %s End time: %s" \
-            % (inq,self.value, self.infotype,self.startdate.strftime("%Y"),self.enddate.strftime("%Y"))
-        if self.location is not None: l = "\n Location: %s" % self.location
-        else: l = "No Location"
-        return str(start+l)
+        return '%s(%s %s %s): %f %s' % (self.valuetype,self.resource,self.relationship,self.collection,self.value,self.unit)
     def __unicode__(self):
         return self.__repr__()
+
 
 class NEInfoCitation(models.Model):
     description = models.TextField(blank=True,default='')
@@ -492,11 +393,3 @@ class NEInfoCitation(models.Model):
     cid = models.ForeignKey(NECitation,related_name='meta_study')
     class Meta:
         verbose_name = 'Info Citation'
-    
-#NE Actor is the base class for organisms, organizations, and complex systems.
-class NEActor(models.Model):
-    name = models.CharField(max_length=30)
-    children = models.ManyToManyField('NEActor',related_name='actor_parents',blank=True,null=True)
-    atype = models.CharField(max_length=3,choices=atypes)
-    class Meta:
-        verbose_name = 'Actor'

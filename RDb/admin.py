@@ -1,5 +1,5 @@
-from RDb.models import NEResource,NEDependency,NEMaterial,NEProduct,NEMaterialClass,NEProductClass,NEActor
-from RDb.models import NECitation,NEProcess,NEProcessIO,NESurveyValue,NEInfoCitation,NESurveyInfo,NEProperty,NEPropertyClass
+from RDb.models import NEResource,NECollection,NEDependency,NEMaterial,NEProduct,NEActor
+from RDb.models import NECitation,NEProcess,NEProcessIO,NESurveyValue,NEInfoCitation,NESurveyInfo,NEProperty
 from django.contrib import admin
 
 # Register your models here.
@@ -9,10 +9,13 @@ class DependencyInline(admin.TabularInline):
     extra = 2
 class CitationInline(admin.TabularInline):
     model = NECitation
+    
 class ProcessIOInline(admin.TabularInline):
     model = NEProcessIO
+    
 class ResourceInline(admin.TabularInline):
     model = NEResource
+    
 class NESurveyValueAdmin(admin.ModelAdmin):
     list_display = ('resource','date','valuetype','value','unit','location')
     #inlines = [CitationInline]
@@ -27,19 +30,18 @@ class NEProcessAdmin(admin.ModelAdmin):
     inlines = [ProcessIOInline]
     
 class NEMaterialAdmin(admin.ModelAdmin):
-    display = 'name'
+    display = ('name','short_name','description')
     inlines = [ResourceInline,DependencyInline]
     
 class NEProductAdmin(admin.ModelAdmin):
-    list_display = ('name','pclass')
+    list_display = ('name','description')
     inlines = [ResourceInline]    
 
 admin.site.register(NEResource)
+admin.site.register(NECollection)
 admin.site.register(NEDependency)
 admin.site.register(NEMaterial,NEMaterialAdmin)
 admin.site.register(NEProduct,NEProductAdmin)
-admin.site.register(NEMaterialClass)
-admin.site.register(NEProductClass)
 admin.site.register(NEActor)
 admin.site.register(NECitation)
 admin.site.register(NEProcess,NEProcessAdmin)
@@ -47,4 +49,3 @@ admin.site.register(NESurveyValue,NESurveyValueAdmin)
 admin.site.register(NEInfoCitation)
 admin.site.register(NESurveyInfo,NESurveyInfoAdmin)
 admin.site.register(NEProperty)
-admin.site.register(NEPropertyClass)
