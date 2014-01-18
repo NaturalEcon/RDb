@@ -233,7 +233,6 @@ class NECollection(models.Model):
     class Meta:
         verbose_name= 'Resource Collection'
         verbose_name_plural = 'Resource Collections'
-        unique_together = (('collection_id','resource'),('collection_id','process'),('collection_id','actor'),)
         
     def __repr__(self):
         return "Collection: %i, %s%s%s\n" % \
@@ -348,8 +347,8 @@ class NESurveyInfo(models.Model):
     ###############################
     # If more than one of the following columns are non-null, then the relationship column should be filled.
     # Example usage: 'resource by collection', 'collection by actor', 'resource from process'
-    resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='surveyinfo_rsc')    
-    collection = models.ForeignKey(NECollection,blank=True,null=True,related_name='surveyinfo_col')
+    resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='surveyinfo_rsc',default="302f5076-7f8e-11e3-bc66-f07bcb4eb64e")    
+    collection = models.ForeignKey(NECollection,blank=True,null=True,related_name='surveyinfo_col',default=1)
     process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='surveyinfo_proc')
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='surveyinfo_act')
     # Relationship is used for rows that contain data in two or more of the first four columns.
@@ -365,7 +364,7 @@ class NESurveyInfo(models.Model):
     valuetype = models.CharField(max_length=3,choices=valuetypes)
     unit = models.CharField(max_length=10)
     # Specifies the type of quantification.
-    infotype = models.CharField(max_length=1,choices=infotypes)
+    infotype = models.CharField(max_length=1,choices=infotypes,default="u")
     records = models.ManyToManyField('NECitation',through='NEInfoCitation',
                                      related_name='cited_by',symmetrical=True)
     location = models.TextField(verbose_name='Location')

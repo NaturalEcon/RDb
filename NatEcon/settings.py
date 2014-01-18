@@ -54,6 +54,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
 ROOT_URLCONF = 'NatEcon.urls'
 
 WSGI_APPLICATION = 'NatEcon.wsgi.application'

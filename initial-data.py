@@ -12,9 +12,11 @@ Created on Fri Jan 10 16:58:20 2014
 """
 class json_generator():
     directory = '/home/acumen/Documents/Sage/NatEcon/Initial-Data/'
+    # 'nesi.csv'
     source_files = ('nem.csv',
+                    'ner.csv',
                     'nep.csv',
-                    'nesi.csv',
+                    
                     'necol.csv',
                     'nesc.csv',
                     'ned.csv'
@@ -23,7 +25,7 @@ class json_generator():
             'infotype':'u'}
     prefix = 'RDb'
     __modelnames__ = { 
-                'nem':'NEResource','ned':'NEDependency','nep':'NEProduct',
+                'nem':'NEResource','ned':'NEDependency','nep':'NEResource','ner':'NEResource',
                 'neprp':'NEProperty','nepro':'NEProcess','nepio':'NEProcessIO','nec':'NECitation',
                 'neicit':'NEInfoCitation','nesv':'NESurveyValue','nesi':'NESurveyInfo',
                 'neac':'NEActor','necol':'NECollection','nesc':'NESubclass'
@@ -33,7 +35,8 @@ class json_generator():
         f = open(self.directory+filename,'r')
         fields = f.readline()
         fields = fields[:-1].split('\t')
-        fields = map(lambda x: x[1:-1],fields)
+        if fields[0][0] == '\'' or fields[0][0] == '\"':
+            fields = map(lambda x: x[1:-1],fields)
         reader = csv.DictReader(f,fieldnames=fields,delimiter='\t')
         out = json.dumps([row for row in reader])
         f.close()
@@ -58,4 +61,3 @@ class json_generator():
             
 j = json_generator()            
 j.dump_files()
-j.load_data()

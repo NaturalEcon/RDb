@@ -1,43 +1,31 @@
-16 January 2014: Refactoring of models, rekeying of data
+18 January 2014: Debugged fixtures and models
 
-The keyspace I initially started with is going to be far too small, so I decided to rekey the database early on while it's still manageable.  UUIDs will now be used as keys for resources, and perhaps processes and actors, as well.  This introduces a dependency on the python UUID library, but as it is built in, that should not present any problems.  Upon realizing that the data model still has problems sharing keys, the model has been further simplified to:
-NEResource now covers all resources without subclassing.
-NESubclass has been created as a M2M table for NER's new attribute.
-NECollection has been extended to all three types of monoids (resource, process, actor).
-All M2M table classes now have a field for the monoid's name, to increase readability.
+All "ne*.json" fixtures should now load correctly.  I can finally begin focusing my efforts on the forms and visualization part.
 
 # On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
 #	modified:   Initial-Data/ID.backup.7z
-#	new file:   Initial-Data/elements-uids.txt
-#	new file:   Initial-Data/necol.csv
-#	new file:   Initial-Data/necol.json
-#	new file:   Initial-Data/ned.csv
-#	new file:   Initial-Data/ned.json
-#	new file:   Initial-Data/nem.csv
-#	new file:   Initial-Data/nem.json
-#	new file:   Initial-Data/nep.csv
-#	new file:   Initial-Data/nep.json
-#	new file:   Initial-Data/nesc.csv
-#	new file:   Initial-Data/nesc.json
-#	new file:   Initial-Data/nesi.csv
-#	new file:   Initial-Data/nesi.json
-#	new file:   Initial-Data/pks.txt
+#	modified:   Initial-Data/necol.csv
+#	modified:   Initial-Data/necol.json
+#	modified:   Initial-Data/nem.csv
+#	modified:   Initial-Data/nem.json
+#	modified:   Initial-Data/nep.csv
+#	modified:   Initial-Data/nep.json
+#	new file:   Initial-Data/ner.csv
+#	new file:   Initial-Data/ner.json
+#	modified:   Initial-Data/nesi.csv
+#	modified:   Initial-Data/nesi.json
 #	modified:   Initial-Data/ptable.json
-#	modified:   RDb/admin.py
+#	modified:   NatEcon/settings.py
 #	modified:   RDb/models.py
-#	new file:   initial-data.py
+#	modified:   initial-data.py
 #	modified:   nedb.sqlite3
-#	modified:   ptable.py
 #
 # Changes not staged for commit:
-#   (use "git add/rm <file>..." to update what will be committed)
+#   (use "git add <file>..." to update what will be committed)
 #   (use "git checkout -- <file>..." to discard changes in working directory)
 #
-#	deleted:    ICE.py
-#	deleted:    Initial-Data/.~lock.pclasses.csv#
-#	deleted:    Initial-Data/pclasses.csv
 #	modified:   commit_msg.txt
 #
