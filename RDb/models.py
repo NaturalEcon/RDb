@@ -145,15 +145,16 @@ ctypes = (
 atypes = ( ('org','Organization'),('ogn','Organism'),('sys','System'),('hom','Person') )
 
 class NEResource(models.Model):
-    id = models.CharField(max_length=40,primary_key=True)
+    rid = models.CharField(max_length=40,primary_key=True)
     name = models.CharField(max_length=64)
     short_name = models.CharField(max_length=16,blank=True,default='')
     long_name = models.CharField(max_length=128,blank=True,default='')
     description = models.TextField()
-    dependencies = models.ManyToManyField('NEResource', related_name='fdep',
+    dependencies = models.ManyToManyField('NEResource', related_name='fdeps',related_query_name='fdep', 
                                           through='NEDependency', symmetrical=False)
-    subclasses   = models.ManyToManyField('NEResource', related_name='superclass',
-                                          through='NESubclass', symmetrical=False)                                         
+    subclasses   = models.ManyToManyField('NEResource', related_name='superclasses', related_query_name='superclass', 
+                                          through='NESubclass', symmetrical=False)
+                                          
     objects = models.Manager()
     dataframe = DataFrameManager()
     
@@ -171,9 +172,6 @@ class NEActor(models.Model):
     name = models.CharField(max_length=30)
     children = models.ManyToManyField('NEActor',related_name='actor_parents',blank=True,null=True)
     atype = models.CharField(max_length=3,choices=atypes)
-
-    members = models.ManyToManyField('NEResource', related_name='group',
-                                          through='NECollection',symmetrical=False) 
     
     class Meta:
         verbose_name = 'Actor'
@@ -181,11 +179,12 @@ class NEActor(models.Model):
         
 # NE Process represents an industrial process or (limited scale) natural process.
 class NEProcess(models.Model):
-    pname = models.CharField(max_length=64,verbose_name='Process name')
+    name = models.CharField(max_length=64,verbose_name='Process name')
     ptype = models.CharField(max_length=1,choices=ptypes,verbose_name='Process type')
     io = models.ManyToManyField( NEResource,through='NEProcessIO',symmetrical=False,
                                 verbose_name='Inputs/Outputs',related_name='relevant_processes')
     description = models.TextField(blank=True,default='')
+    
     objects = models.Manager()
     dataframe = DataFrameManager()
      
@@ -201,6 +200,10 @@ class NEProperty(models.Model):
     description = models.TextField()
     value = models.FloatField()
     error = models.FloatField()
+    
+    class Meta:
+        verbose_name = 'Property'
+        verbose_name_plural = 'Properties'
 
 # An adjacency table for NE Process inputs and outputs
 class NEProcessIO(models.Model):
@@ -242,29 +245,38 @@ class NECollection(models.Model):
 
 # An adjacency table for the composition of a complex resource    
 class NEDependency(models.Model):
-    parent_resource = models.ForeignKey(NEResource,related_name='forward_dependency')
+    parent_resource = models.ForeignKey(NEResource,related_name='backward_dependencies',
+                                        related_query_name='backward_dependency')
     parent_name = models.CharField(max_length=64)
-    dependency = models.ForeignKey(NEResource,related_name='backward_dependency')
+    dependency = models.ForeignKey(NEResource,related_name='forward_dependencies',
+                                        related_query_name='forward_dependency')
     dependency_name = models.CharField(max_length=64)
     dependency_mult = models.FloatField(default=1.0,verbose_name='Dependency Multiplicity')
     
     class Meta:
+        verbose_name = 'Dependency'
         verbose_name_plural = 'Dependencies'
         unique_together = (('parent_resource','dependency'),)
     
     def __repr__(self):
-        return "%s requires %5.2f x %s" % (self.parent_name,self.dependency_mult,self.dependency_name)
+        return "%s requires %5.2f x %s" % (self.parent_resource,self.dependency_mult,self.dependency)
     def __unicode__(self):
         return self.__repr__()
 
 # An adjacency table for classification
 class NESubclass(models.Model):
-    parent_class = models.ForeignKey(NEResource,related_name='parent_class')
+    parent_class = models.ForeignKey(NEResource,related_name='parent_classes',
+                                     related_query_name='parent_class')
     parent_name = models.CharField(max_length=64)
-    child_class = models.ForeignKey(NEResource,related_name='child_class')
+    child_class = models.ForeignKey(NEResource,related_name='child_classes',
+                                     related_query_name='child_class')
     child_name = models.CharField(max_length=64)
     description = models.TextField()
-
+    
+    class Meta:
+        verbose_name = 'Subclass'
+        verbose_name_plural = 'Subclasses'
+    
     def __repr__(self):
         return 'Superclass: %s\nSubclass: %s' % (self.parent_name,self.child_name)
         
@@ -309,7 +321,7 @@ class NESurveyValue(models.Model):
     process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='surveyvalue_proc')
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='surveyvalue_act')
     # UNIX time of observation
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True)
     # Relationship is used for rows that contain data in two or more of the first four columns.
     relationship = models.CharField(max_length=6,default='Improperly Entered Row')    
     description = models.TextField(blank=True,null=True)
@@ -347,8 +359,8 @@ class NESurveyInfo(models.Model):
     ###############################
     # If more than one of the following columns are non-null, then the relationship column should be filled.
     # Example usage: 'resource by collection', 'collection by actor', 'resource from process'
-    resource = models.ForeignKey(NEResource,blank=True,null=True,related_name='surveyinfo_rsc',default="302f5076-7f8e-11e3-bc66-f07bcb4eb64e")    
-    collection = models.ForeignKey(NECollection,blank=True,null=True,related_name='surveyinfo_col',default=1)
+    resource = models.ForeignKey(NEResource,blank=True,related_name='surveyinfo_rsc',default="302f5076-7f8e-11e3-bc66-f07bcb4eb64e")    
+    collection = models.ForeignKey(NECollection,blank=True,null=True,related_name='surveyinfo_col')
     process = models.ForeignKey(NEProcess,blank=True,null=True,related_name='surveyinfo_proc')
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='surveyinfo_act')
     # Relationship is used for rows that contain data in two or more of the first four columns.
@@ -356,8 +368,8 @@ class NESurveyInfo(models.Model):
     relationship = models.CharField(max_length=6,default='Improperly Entered Row')    
     description = models.TextField(blank=True,null=True)
     
-    startdate = models.DateField(blank=True,default='2049-12-31')
-    enddate = models.DateField(blank=True,default='2050-01-01')
+    startdate = models.DateField(auto_now_add=True,blank=True,null=True)
+    enddate = models.DateField(auto_now_add=True,blank=True,null=True)
     
     value = models.FloatField()
     # Specifies what is being quantified
@@ -365,8 +377,9 @@ class NESurveyInfo(models.Model):
     unit = models.CharField(max_length=10)
     # Specifies the type of quantification.
     infotype = models.CharField(max_length=1,choices=infotypes,default="u")
-    records = models.ManyToManyField('NECitation',through='NEInfoCitation',
-                                     related_name='cited_by',symmetrical=True)
+    record = models.ForeignKey('NECitation',null=True,blank=True)
+    #records = models.ManyToManyField('NECitation',through='NEInfoCitation',
+    #                                 related_name='cited_by',symmetrical=True)
     location = models.TextField(verbose_name='Location')
     
     objects =   models.Manager()

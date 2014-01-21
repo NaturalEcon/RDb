@@ -1,4 +1,4 @@
-"id"	"name"	"description"	"short_name"
+"rid"	"name"	"description"	"short_name"
 "303f729e-7f8e-11e3-bc66-f07bcb4eb64e"	"Products"		"P"
 "303f81da-7f8e-11e3-bc66-f07bcb4eb64e"	"Energy"	"Total enthalpy in a system"	"EN"
 "303f909e-7f8e-11e3-bc66-f07bcb4eb64e"	"Entropy"	"“A measure of the number of specific ways in which a thermodynamic system may be arranged, often taken to be a measure of disorder, or a measure of progressing towards thermodynamic equilibrium.”"	"ES"

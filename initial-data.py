@@ -12,27 +12,31 @@ Created on Fri Jan 10 16:58:20 2014
 """
 class json_generator():
     directory = '/home/acumen/Documents/Sage/NatEcon/Initial-Data/'
+    csv_dir = 'CSV/'
+    json_dir = 'JSON/'
     # 'nesi.csv'
     source_files = ('nem.csv',
                     'ner.csv',
                     'nep.csv',
-                    
-                    'necol.csv',
                     'nesc.csv',
-                    'ned.csv'
+                    'ned.csv',
+                    'nec.csv',
+                    'necol.csv',
+                    'nesi.csv'
                     )
-    __defaults__ = {'date':'2011-01-01','startdate':'2011-01-01','location':'World','ref':'1',
+    __defaults__ = {'date':'2011-01-01','startdate':'2011-01-01','enddate':'2050-01-01','location':'World','ref':'1',
             'infotype':'u'}
     prefix = 'RDb'
-    __modelnames__ = { 
+    __modelnames__ = {
                 'nem':'NEResource','ned':'NEDependency','nep':'NEResource','ner':'NEResource',
                 'neprp':'NEProperty','nepro':'NEProcess','nepio':'NEProcessIO','nec':'NECitation',
                 'neicit':'NEInfoCitation','nesv':'NESurveyValue','nesi':'NESurveyInfo',
                 'neac':'NEActor','necol':'NECollection','nesc':'NESubclass'
-            }    
-    # Needs to fix date formatting.        
+            }
+    __pk__ = { 'NEResource':'rid' }
+    # Needs to fix date formatting.
     def json_dump(self,filename):
-        f = open(self.directory+filename,'r')
+        f = open(self.directory+self.csv_dir+filename,'r')
         fields = f.readline()
         fields = fields[:-1].split('\t')
         if fields[0][0] == '\'' or fields[0][0] == '\"':
@@ -43,21 +47,58 @@ class json_generator():
         model = self.prefix+'.'+self.__modelnames__[filename[:-4]]
         out = out.replace('{','{\"model\":\"'+model+'\",\"fields\":{')
         out = out.replace('}','}}')
-        f = open(self.directory+filename[:-3]+'json','w')
+        out = out.replace('\"date\": \"\"','\"date\": \"'+self.__defaults__['date']+'\"')
+        out = out.replace('\"startdate\": \"\"','\"startdate\": \"'+self.__defaults__['startdate']+'\"')
+        out = out.replace('\"enddate\": \"\"','\"enddate\": \"'+self.__defaults__['enddate']+'\"')
+        f = open(self.directory+self.json_dir+filename[:-3]+'json','w')
         f.write(out)
         f.close()
-    
-    
+
+    def json_dump_alt(self,filename):
+        modelname = self.prefix+'.'+self.__modelnames__[filename[:-4]]
+        ftext = '\",\"fields\":'
+        short_name = '","short_name":"'
+        end = '"}}'
+        lines = []
+        f = open(self.directory+self.csv_dir+filename,'r')
+        fields = f.readline()
+        fields = fields.replace('\"','')
+        fields = fields[:-1].split('\t')
+        reader = csv.DictReader(f,fieldnames=fields,delimiter='\t')
+
+        pk = 'pk'
+        for row in reader:
+            line = '{\"model\":\"%s\",' % modelname
+            try:
+                line += '\"%s\":\"%s\",' % (pk,row[pk])
+                del row[pk]
+            except KeyError:
+                pass
+            line += '\"fields\": %s },' % unicode(row)
+            lines += [line]
+        f.close()
+        text = '['
+        text += ''.join(lines)
+        text = text.replace('\'','\"')
+        text = text[:-1] + ']'
+        for f in fields:
+			blank = '\"%s\": \"\",' % f
+			text = text.replace(blank, '')
+        f = open(self.directory+self.json_dir+filename[:-3]+'json','w')
+        f.write(text)
+        f.close()
+
+
     def dump_files(self):
         for filename in self.source_files:
-            self.json_dump(filename)
-            
+            self.json_dump_alt(filename)
+
     def load_data(self):
         from django.core.management import execute_from_command_line
         command = 'loaddata'
         for filename in self.source_files:
             f = filename[:-3]+'json'
             execute_from_command_line(command+' '+f)
-            
-j = json_generator()            
+
+j = json_generator()
 j.dump_files()
