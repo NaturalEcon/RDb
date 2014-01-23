@@ -1,0 +1,8 @@
+{% if resource_list %}
+    {% for resource in resource_list %}
+        <br/><a href="/RDb/{{ resource.rid }}/">{{ resource.name|default:"Unnamed resource" }}</a>
+    {% endfor %}
+{% else %}
+    <p>No resources are available.</p>
+{% endif %}
+

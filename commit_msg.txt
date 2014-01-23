@@ -1,74 +1,38 @@
-20 January 2014: Fixtures, startup scripts.
+22 January 2014: Views, URLs.
 
-Fixed a small number of maddening bugs.  Anything else I could say would be superfluous.
+Got several of the views working, including resources, surveys, and the list of all resources.  I learned I am better at web design than web implementation.
 
 # On branch master
 # Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
 #
-#	new file:   2014-01-18-115135_1024x600_scrot.png
-#	new file:   Initial-Data/CSV/.~lock.nesi.csv#
-#	new file:   Initial-Data/CSV/nec.csv
-#	new file:   Initial-Data/CSV/necol.csv
-#	new file:   Initial-Data/CSV/ned.csv
-#	new file:   Initial-Data/CSV/nem.csv
-#	new file:   Initial-Data/CSV/nep.csv
-#	new file:   Initial-Data/CSV/ner.csv
-#	new file:   Initial-Data/CSV/nesc.csv
-#	new file:   Initial-Data/CSV/nesi.csv
-#	new file:   Initial-Data/JSON/nec.json
-#	new file:   Initial-Data/JSON/necol.json
-#	new file:   Initial-Data/JSON/ned.json
-#	new file:   Initial-Data/JSON/nem.json
-#	new file:   Initial-Data/JSON/nep.json
-#	new file:   Initial-Data/JSON/ner.json
-#	new file:   Initial-Data/JSON/nesc.json
-#	new file:   Initial-Data/JSON/nesi.json
-#	new file:   Initial-Data/JSON/ptable.json
-#	modified:   Initial-Data/elements-uids.txt
-#	new file:   Initial-Data/nec.csv
-#	modified:   NatEcon/urls.py
-#	new file:   RDb/NEGraphs.py
+#	new file:   2014-01-22-225754_1024x600_scrot.png
+#	new file:   Initial-Data/CSV/.~lock.nem.csv#
+#	modified:   Initial-Data/CSV/nem.csv
+#	new file:   Initial-Data/JSON/JSON.backup.7z
+#	modified:   Initial-Data/JSON/nesi.json
+#	new file:   Media/test-graph.png
+#	new file:   NatEcon/ancap-vs-tzm-vs-neviaac.html
+#	modified:   NatEcon/settings.py
 #	modified:   RDb/admin.py
-#	modified:   RDb/managers.py
 #	modified:   RDb/models.py
-#	new file:   RDb/urls.py
+#	modified:   RDb/urls.py
 #	modified:   RDb/views.py
-#	modified:   commit_msg.txt
-#	modified:   initial-data.py
-#	new file:   loaddata.py
+#	new file:   Templates/RDb/index.html
+#	new file:   Templates/RDb/resource.html
+#	new file:   Templates/RDb/surveyvalue.html
+#	new file:   Templates/index.html
+#	new file:   Templates/menu.css
+#	new file:   Templates/menu.gif
+#	new file:   Templates/resource_list.html
+#	new file:   menu51/index.html
 #	modified:   nedb.sqlite3
-#	new file:   test-graph.png
 #
 # Changes not staged for commit:
 #   (use "git add/rm <file>..." to update what will be committed)
 #   (use "git checkout -- <file>..." to discard changes in working directory)
 #
-#	deleted:    ICE-csv.csv
-#	deleted:    ICE-references.ods
-#	deleted:    Initial-Data/ICE-C.csv
-#	deleted:    Initial-Data/ICE-M.csv
-#	deleted:    Initial-Data/ICE-MC.csv
-#	deleted:    Initial-Data/ICE-MD.csv
-#	deleted:    Initial-Data/ICE-P.csv
-#	deleted:    Initial-Data/ICE-PC.csv
-#	deleted:    Initial-Data/ICE-PR.csv
-#	deleted:    Initial-Data/ICE-SI.csv
-#	deleted:    Initial-Data/ID.backup.7z
-#	deleted:    Initial-Data/metals-surveys.csv
-#	deleted:    Initial-Data/necol.csv
-#	deleted:    Initial-Data/necol.json
-#	deleted:    Initial-Data/ned.csv
-#	deleted:    Initial-Data/ned.json
-#	deleted:    Initial-Data/nem.csv
-#	deleted:    Initial-Data/nem.json
-#	deleted:    Initial-Data/nep.csv
-#	deleted:    Initial-Data/nep.json
-#	deleted:    Initial-Data/ner.csv
-#	deleted:    Initial-Data/ner.json
-#	deleted:    Initial-Data/nesc.csv
-#	deleted:    Initial-Data/nesc.json
-#	deleted:    Initial-Data/nesi.csv
-#	deleted:    Initial-Data/nesi.json
-#	deleted:    Initial-Data/ptable.json
+#	deleted:    Initial-Data/CSV/.~lock.nesi.csv#
+#	modified:   commit_msg.txt
+#	deleted:    test-graph.png
 #

@@ -70,7 +70,8 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'nedb.sqlite3'),
     }
 }
-
+MEDIA_ROOT='/home/acumen/Documents/Sage/NatEcon/Media/'
+MEDIA_URL='static/'
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 

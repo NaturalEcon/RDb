@@ -1,0 +1,24 @@
+<head>
+	<link rel="stylesheet" href="menu.css" type="text/css"/> 
+	<title>Resource List</title>
+</head>
+<body>
+<div id="menu">
+	{% for item in indexed_resource_list %}
+		<a><h3>{{ item.a }}</h3></a><br/>
+			<div style="display: none">
+			{% for resource in item.b %}
+				<a href="/RDb/resource/{{ resource.rid }}/">{{ resource.name }}</a><br/>
+			{% endfor %}
+			</div>
+	{% endfor %}
+</div>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript">
+$('#menu > a').click(function(){
+    $(this).next().next().slideToggle();
+    return false;
+});
+</script>
+</body>

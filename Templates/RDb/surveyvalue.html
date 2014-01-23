@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{# <link rel="stylesheet" href="style.css" /> #}
+	<h2>{% block title %}{{ name|default:"Unnamed survey" }}{% endblock %}</h2>
+</head>
+
+<body>
+	<div id="sidebar">
+		{% block sidebar %} 
+			
+		{% endblock sidebar %}
+	</div>
+	<div id="content">
+		{% block content %}
+		{{ description|default:"There is no description for this survey data." }}<br/>
+		{{ about_string }}<br/>
+		{{ about }}: {{ value_string }}<br/>
+		Citation: {{ ctitle }} <br/>
+		{{ cmid }} <br/>
+		{{ cend }} <br/>
+		{% endblock content %}
+	</div>
+	
+	
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript">
+$('#menu > a').click(function(){
+    $(this).next().next().slideToggle();
+    return false;
+});
+</script>
+</body>
+

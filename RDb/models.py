@@ -196,6 +196,9 @@ class NEProcess(models.Model):
         return "%s (Type %s)\n Inputs: %s \n Outputs: %s" % (self.pname,self.ptype,self.inputs,self.outputs)
 
 class NEProperty(models.Model):
+#    resource = models.ForeignKey(NEResource, related_name='rproperties',null=True,blank=True)
+#    process = models.ForeignKey('NEProcess', related_name='pproperties',null=True,blank=True)
+#    actor = models.ForeignKey('NEActor', related_name='aproperties',null=True,blank=True)
     pname = models.CharField(max_length=64,verbose_name='Property name')
     description = models.TextField()
     value = models.FloatField()
@@ -225,21 +228,25 @@ class NEProcessIO(models.Model):
 # A collection of resources, processes, or actors.        
 class NECollection(models.Model):
     collection_id = models.IntegerField(verbose_name='Collection ID')
-    collection_name = models.TextField(max_length=32,verbose_name='Collection name')
+    collection_name = models.CharField(max_length=128,blank=True,null=True)
     resource = models.ForeignKey(NEResource, related_name='rcollections',null=True,blank=True)
-    resource_name = models.CharField(max_length=64)
     process = models.ForeignKey('NEProcess', related_name='pcollections',null=True,blank=True)
-    process_name = models.CharField(max_length=64)
     actor = models.ForeignKey('NEActor', related_name='acollections',null=True,blank=True)
-    actor_name = models.CharField(max_length=64)
 
     class Meta:
-        verbose_name= 'Resource Collection'
-        verbose_name_plural = 'Resource Collections'
+        verbose_name= 'Collection'
+        verbose_name_plural = 'Collections'
         
     def __repr__(self):
-        return "Collection: %i, %s%s%s\n" % \
-            (self.collection_id,self.resource_name,self.process_name,self.actor_name)
+        output = '#%i:' % self.collection_id
+        if self.resource is not None:
+            output += ' %s ' % self.resource
+        if self.process is not None:
+            output += ' %s ' % self.process
+        if self.actor is not None:
+            output += ' %s ' % self.actor
+        return output
+        
     def __unicode__(self):
         return self.__repr__()
 
@@ -247,10 +254,8 @@ class NECollection(models.Model):
 class NEDependency(models.Model):
     parent_resource = models.ForeignKey(NEResource,related_name='backward_dependencies',
                                         related_query_name='backward_dependency')
-    parent_name = models.CharField(max_length=64)
     dependency = models.ForeignKey(NEResource,related_name='forward_dependencies',
                                         related_query_name='forward_dependency')
-    dependency_name = models.CharField(max_length=64)
     dependency_mult = models.FloatField(default=1.0,verbose_name='Dependency Multiplicity')
     
     class Meta:
@@ -278,7 +283,7 @@ class NESubclass(models.Model):
         verbose_name_plural = 'Subclasses'
     
     def __repr__(self):
-        return 'Superclass: %s\nSubclass: %s' % (self.parent_name,self.child_name)
+        return 'Superclass: %s\nSubclass: %s' % (self.parent_class,self.child_class)
         
 # NE Citation is a simple research citation class until I implement Zotero support.
 #  Because it is not intended to be in the project long-term, it will be limited to only
@@ -299,9 +304,9 @@ class NECitation(models.Model):
     
     def __repr__(self):
         output = ""
-        if self.title is not None: output += self.title + ". "
+        if self.title is not None: output += self.title + ""
         if self.author is not None: 
-            output += self.author + ", "
+            output += self.author + "."
         if self.doi is not None: output += self.doi + " "
         return output
 
@@ -324,6 +329,7 @@ class NESurveyValue(models.Model):
     date = models.DateField(auto_now_add=True)
     # Relationship is used for rows that contain data in two or more of the first four columns.
     relationship = models.CharField(max_length=6,default='Improperly Entered Row')    
+    # name = models.CharField(max_length=64,blank=True,null=True)
     description = models.TextField(blank=True,null=True)
     # Value type.  See static 'valuetypes' definition for documentation.    
     valuetype = models.CharField(max_length=3,choices=valuetypes)
@@ -345,7 +351,16 @@ class NESurveyValue(models.Model):
         verbose_name = 'Survey Value'
         
     def __repr__(self):
-        return '%s(%s %s %s): %f %s' % (self.valuetype,self.resource,self.relationship,self.collection,self.value,self.unit)    
+        output = ''
+        if self.resource is not None:
+            output = '%s(%s): %f %s' % (self.valuetype,self.resource,self.value,self.unit)
+        elif self.process is not None:
+            output = '%s(%s): %f %s' % (self.valuetype,self.process,self.value,self.unit)
+        elif self.actor is not None:
+            output = '%s(%s): %f %s' % (self.valuetype,self.actor,self.value,self.unit)
+        else:
+            'Ambiguous survey.  Please delete or re-enter.'
+        return output  
     def __unicode__(self):
         return self.__repr__()
    
@@ -365,7 +380,7 @@ class NESurveyInfo(models.Model):
     actor = models.ForeignKey('NEActor',blank=True,null=True,related_name='surveyinfo_act')
     # Relationship is used for rows that contain data in two or more of the first four columns.
     # For now the database will just contain the information, without the application having much use for it.
-    relationship = models.CharField(max_length=6,default='Improperly Entered Row')    
+    relationship = models.CharField(max_length=6,default='')    
     description = models.TextField(blank=True,null=True)
     
     startdate = models.DateField(auto_now_add=True,blank=True,null=True)
@@ -394,7 +409,22 @@ class NESurveyInfo(models.Model):
         verbose_name_plural = 'Survey Info'    
     
     def __repr__(self):
-        return '%s(%s %s %s): %f %s' % (self.valuetype,self.resource,self.relationship,self.collection,self.value,self.unit)
+        output = ''
+        if self.collection is not None and self.resource is not None:
+            output = '%s(%s %s %s): %f %s' % (self.valuetype,self.resource,self.relationship,self.collection,self.value,self.unit)
+        elif self.collection is not None and self.process is not None:
+            output = '%s(%s %s %s): %f %s' % (self.valuetype,self.process,self.relationship,self.collection,self.value,self.unit)
+        elif self.collection is not None and self.actor is not None:
+            output = '%s(%s %s %s): %f %s' % (self.valuetype,self.actor,self.relationship,self.collection,self.value,self.unit)
+        elif self.resource is not None:
+            output = '%s(%s): %f %s' % (self.valuetype,self.resource,self.value,self.unit)
+        elif self.process is not None:
+            output = '%s(%s): %f %s' % (self.valuetype,self.process,self.value,self.unit)
+        elif actor is not None:
+            output = '%s(%s): %f %s' % (self.valuetype,self.actor,self.value,self.unit)
+        else:
+            'Ambiguous survey.  Please delete or re-enter.'
+        return output
     def __unicode__(self):
         return self.__repr__()
 

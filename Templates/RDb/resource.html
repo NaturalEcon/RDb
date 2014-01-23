@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{# <link rel="stylesheet" href="style.css" /> #}
+	<h2>{% block title %}{{ name|default:"Unnamed resource" }}{% endblock %}</h2>
+</head>
+
+<body>
+	<div id="sidebar">
+		{% block sidebar %} 
+			{% block img %}
+			<img src="/RDb/{{MEDIA_URL}}test-graph.png"/>
+			{% endblock img %}
+		{% endblock sidebar %}
+	</div>
+	<div id="menu">
+		{% block content %}
+		{{ description|default:"There is no description for this resource." }}
+		<a><h3><ul>Survey Data</ul></h3></a> <br/>
+			<div style="display: none">
+			{% for survey in survey_data %}
+				<a href="/RDb/surveyvalue/{{ survey.id }}/">{{ survey|default:"No properties for this resource." }}</a><br />
+			{% endfor %}
+			</div>
+		<a><h3><ul>Survey Info</ul></h3></a> <br/>
+			<div style="display: none">
+			{% for survey in survey_info %}
+				<a href="/RDb/surveyinfo/{{ survey.id }}/">{{ survey|default:"No properties for this resource." }}</a><br />
+			{% endfor %}
+			</div>
+		<a><h3><ul>Properties</ul></h3></a> <br/>
+			<div style="display: none">
+			{% for property in properties %}
+				<a href="/RDb/property/{{ property.id }}/">{{ property|default:"No properties for this resource." }}</a><br />
+			{% endfor %}
+			</div>
+		<a><h3><ul>Dependencies</ul></h3></a> <br/>
+			<div style="display: none">
+			{% for dependency in dependencies %}
+				<a href="/RDb/dependency/{{ dependency.id }}/">{{ dependency|default:"No properties for this resource." }}</a><br />
+			{% endfor %}
+			</div>
+		{% endblock content %}
+	</div>
+	
+	
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript">
+$('#menu > a').click(function(){
+    $(this).next().next().slideToggle();
+    return false;
+});
+</script>
+</body>
+
