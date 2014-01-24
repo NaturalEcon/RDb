@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, include, url
 from RDb import views
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 admin.autodiscover()
 
 uuid_re = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
@@ -18,4 +20,4 @@ urlpatterns = patterns('',
     url(r'^surveyinfo/(?P<si_id>\d+)/$', views.nesurveyinfo, name='surveyinfo'),
 #    url(r'^collection/(?P<necollection_id>\d+)/$', views.necollection, name='collection'),
 #    url(r'^dependency/(?P<nedependency_id>\d+)/$', views.nedependency, name='dependency'),
-)
+) 

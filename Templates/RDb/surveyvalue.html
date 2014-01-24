@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	{# <link rel="stylesheet" href="style.css" /> #}
+	<link href="/RDb/static/surveys.css" rel="stylesheet" type="text/css">
 	<h2>{% block title %}{{ name|default:"Unnamed survey" }}{% endblock %}</h2>
 </head>
 
@@ -12,23 +12,19 @@
 		{% endblock sidebar %}
 	</div>
 	<div id="content">
-		{% block content %}
-		{{ description|default:"There is no description for this survey data." }}<br/>
-		{{ about_string }}<br/>
-		{{ about }}: {{ value_string }}<br/>
-		Citation: {{ ctitle }} <br/>
-		{{ cmid }} <br/>
-		{{ cend }} <br/>
-		{% endblock content %}
+	{% block content %}
+	<ul>
+		<li><a>Description</a></li>
+		<div>{{ description|default:"There is no description for this survey data." }}</div>
+		<li><a>Data:</a></li>
+		<div>{{ about_string }} {{ about|lower }}: 
+		 <p/>{{ value_string }}</div>
+		<li><a>Citation:</a></li>
+		<div>{{ ctitle }}
+		 <p/>{{ cmid }}
+		 <p/>{{ cend }}</div>		
+	</ul>
+	{% endblock content %}
 	</div>
-	
-	
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-<script type="text/javascript">
-$('#menu > a').click(function(){
-    $(this).next().next().slideToggle();
-    return false;
-});
-</script>
 </body>
 

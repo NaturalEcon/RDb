@@ -1,24 +1,22 @@
 <head>
-	<link rel="stylesheet" href="menu.css" type="text/css"/> 
+	<link href="/RDb/static/menu.css" rel="stylesheet" type="text/css">
 	<title>Resource List</title>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script type='text/javascript' src="/RDb/static/menu_jquery.js"></script>
 </head>
 <body>
-<div id="menu">
-	{% for item in indexed_resource_list %}
-		<a><h3>{{ item.a }}</h3></a><br/>
-			<div style="display: none">
-			{% for resource in item.b %}
-				<a href="/RDb/resource/{{ resource.rid }}/">{{ resource.name }}</a><br/>
-			{% endfor %}
-			</div>
-	{% endfor %}
+<h2>All Resources</h2>
+<div id='cssmenu'>
+<ul>
+   {% for item in indexed_resource_list %}
+   <li class='has-sub'><a><span>{{ item.a }}</span></a>
+      <ul>
+		 {% for resource in item.b %}
+         <li><a href='/RDb/resource/{{ resource.rid }}/'><span>{{ resource.name }}</span></a></li>
+         {% endfor %}
+      </ul>
+   </li>
+   {% endfor %}
+</ul>
 </div>
-
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-<script type="text/javascript">
-$('#menu > a').click(function(){
-    $(this).next().next().slideToggle();
-    return false;
-});
-</script>
 </body>

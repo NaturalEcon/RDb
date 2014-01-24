@@ -193,7 +193,7 @@ class NEProcess(models.Model):
         verbose_name_plural = 'Processes'
 
     def __repr__(self):
-        return "%s (Type %s)\n Inputs: %s \n Outputs: %s" % (self.pname,self.ptype,self.inputs,self.outputs)
+        return "%s (Type %s)\n Inputs: %s \n Outputs: %s" % (self.pname,self.get_ptype_display(),self.inputs,self.outputs)
 
 class NEProperty(models.Model):
 #    resource = models.ForeignKey(NEResource, related_name='rproperties',null=True,blank=True)
@@ -353,11 +353,11 @@ class NESurveyValue(models.Model):
     def __repr__(self):
         output = ''
         if self.resource is not None:
-            output = '%s(%s): %f %s' % (self.valuetype,self.resource,self.value,self.unit)
+            output = '%s of %s: %5.2f %s' % (self.get_valuetype_display(),self.resource,self.value,self.unit)
         elif self.process is not None:
-            output = '%s(%s): %f %s' % (self.valuetype,self.process,self.value,self.unit)
+            output = '%s of %s: %5.2f %s' % (self.get_valuetype_display(),self.process,self.value,self.unit)
         elif self.actor is not None:
-            output = '%s(%s): %f %s' % (self.valuetype,self.actor,self.value,self.unit)
+            output = '%s of %s: %5.2f %s' % (self.get_valuetype_display(),self.actor,self.value,self.unit)
         else:
             'Ambiguous survey.  Please delete or re-enter.'
         return output  
@@ -411,17 +411,17 @@ class NESurveyInfo(models.Model):
     def __repr__(self):
         output = ''
         if self.collection is not None and self.resource is not None:
-            output = '%s(%s %s %s): %f %s' % (self.valuetype,self.resource,self.relationship,self.collection,self.value,self.unit)
+            output = '%s of %s %s %s: %5.2f %s' % (self.get_valuetype_display(),self.resource,self.relationship,self.collection,self.value,self.unit)
         elif self.collection is not None and self.process is not None:
-            output = '%s(%s %s %s): %f %s' % (self.valuetype,self.process,self.relationship,self.collection,self.value,self.unit)
+            output = '%s of %s %s %s: %5.2f %s' % (self.get_valuetype_display(),self.process,self.relationship,self.collection,self.value,self.unit)
         elif self.collection is not None and self.actor is not None:
-            output = '%s(%s %s %s): %f %s' % (self.valuetype,self.actor,self.relationship,self.collection,self.value,self.unit)
+            output = '%s of %s %s %s: %5.2f %s' % (self.get_valuetype_display(),self.actor,self.relationship,self.collection,self.value,self.unit)
         elif self.resource is not None:
-            output = '%s(%s): %f %s' % (self.valuetype,self.resource,self.value,self.unit)
+            output = '%s of %s: %5.2f %s' % (self.get_valuetype_display(),self.resource,self.value,self.unit)
         elif self.process is not None:
-            output = '%s(%s): %f %s' % (self.valuetype,self.process,self.value,self.unit)
+            output = '%s of %s: %5.2f %s' % (self.get_valuetype_display(),self.process,self.value,self.unit)
         elif actor is not None:
-            output = '%s(%s): %f %s' % (self.valuetype,self.actor,self.value,self.unit)
+            output = '%s of %s: %5.2f %s' % (self.get_valuetype_display(),self.actor,self.value,self.unit)
         else:
             'Ambiguous survey.  Please delete or re-enter.'
         return output

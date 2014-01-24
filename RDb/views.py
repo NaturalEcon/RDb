@@ -139,9 +139,9 @@ def nesurveyinfo(request,si_id):
     
     cmid = "%s, %s." % (citation.author,citation.date)
     cend = ''
-    if citation.doi is not None:
+    if citation.doi is not '':
         cend = "%s" % citation.doi
-    if citation.isbn is not None:
+    if citation.isbn is not '':
         cend = "%s" % citation.isbn
         
     resource = survey.resource
@@ -160,7 +160,7 @@ def nesurveyinfo(request,si_id):
         about_string = 'Process'
         about = process
         
-    value_string = '%s on %s %5.2f%s' % (survey.valuetype,survey.startdate,survey.value,survey.unit)
+    value_string = '%s on %s %5.2f%s' % (survey.get_valuetype_display(),survey.startdate,survey.value,survey.unit)
     context = RequestContext(request, {
         'about': about,
         'about_string': about_string,

@@ -70,6 +70,8 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'nedb.sqlite3'),
     }
 }
+MEDIA_ROOT='/home/acumen/Documents/Sage/NatEcon/Media/'
+MEDIA_URL='static/'
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
@@ -86,10 +88,5 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
-STATICFILES_DIRS = (
-    os.path.abspath(os.path.join(ROOT_PATH, 'static')),
-)
-MEDIA_URL = '/media/'
-STATIC_ROOT = os.path.join(ROOT_PATH, "media/RDb")
-STATIC_URL = 'RDb/static/'
+
+STATIC_URL = '/static/'
