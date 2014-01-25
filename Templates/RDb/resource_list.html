@@ -8,11 +8,11 @@
 <h2>All Resources</h2>
 <div id='cssmenu'>
 <ul>
-   {% for item in indexed_resource_list %}
+   {% for item in resource_list %}
    <li class='has-sub'><a><span>{{ item.a }}</span></a>
       <ul>
 		 {% for resource in item.b %}
-         <li><a href='/RDb/resource/{{ resource.rid }}/'><span>{{ resource.name }}</span></a></li>
+         <li><a href='/RDb/resource/{{ object.rid }}/'><span>{{ resource.name }}</span></a></li>
          {% endfor %}
       </ul>
    </li>

@@ -3,6 +3,8 @@
 <head>
 	<link href="/RDb/static/surveys.css" rel="stylesheet" type="text/css">
 	<h2>{% block title %}{{ name|default:"Unnamed survey" }}{% endblock %}</h2>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script type='text/javascript' src="/RDb/static/form.js"></script>
 </head>
 
 <body>
@@ -15,14 +17,34 @@
 	{% block content %}
 	<ul>
 		<li><a>Description</a></li>
-		<div>{{ description|default:"There is no description for this survey data." }}</div>
+			<div id="info">
+				<p>{{ survey.description|default:"There is no description for this survey data." }}</p>
+			</div>
+			<div id="form"><form method="post" action="{% url 'RDb:edit_description' survey.id %}">
+				<textarea name="description" cols="40" rows="5">
+					{{ survey.description }}
+				</textarea><br>
+				<input type="submit" value="Submit" />
+				</form>
+			</div>
+			
 		<li><a>Data:</a></li>
-		<div>{{ about_string }} {{ about|lower }}: 
-		 <p/>{{ value_string }}</div>
+			<div id="info">{{ about_string }} {{ about|lower }}: 
+				<p>{{ dd_string }}</p>
+				<p>{{ value }}</p>
+			</div>
+			<div id="form"><form method="post" action="">
+				
+				<input type="submit" value="Submit" />
+				</form>
+			</div>
+		
 		<li><a>Citation:</a></li>
-		<div>{{ ctitle }}
-		 <p/>{{ cmid }}
-		 <p/>{{ cend }}</div>		
+		<div id="info">
+			<p>{{ ctitle }}</p>
+			<p>{{ cmid }}</p>
+			<p>{{ cend }}</p>
+		</div>		
 	</ul>
 	{% endblock content %}
 	</div>

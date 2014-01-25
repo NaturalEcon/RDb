@@ -1,5 +1,5 @@
-from RDb.models import NEResource,NECollection,NEDependency,NESubclass,NEActor
-from RDb.models import NECitation,NEProcess,NEProcessIO,NESurveyValue,NEInfoCitation,NESurveyInfo,NEProperty
+from RDb.descriptivemodels import NEResource,NECollection,NEDependency,NESubclass,NEActor
+from RDb.descriptivemodels import NECitation,NEProcess,NEProcessIO,NESurveyValue,NEInfoCitation,NESurveyInfo,NEProperty
 from django.contrib import admin
 
 # Register your models here.

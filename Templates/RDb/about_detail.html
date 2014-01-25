@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 	<link href="/RDb/static/wide_menu.css" rel="stylesheet" type="text/css">
-	<title>Resource List</title>
+	<title>{% block title %}{{ object.name }}{% endblock %}</title>
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script type='text/javascript' src="/RDb/static/menu_jquery.js"></script>
 </head>
 
 <body>
-	<h2>{% block title %}{{ object.name|default:"Unnamed resource" }} ({{ object.short_name }}){% endblock %}</h2>
+	<h2>{% block headline %}{{ object.name|default:"Unnamed resource" }} ({{ object.short_name }}){% endblock %}</h2>
 	<div id="sidebar">
 		{% block sidebar %} 
 			{% block img %}

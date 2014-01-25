@@ -1,40 +1,4 @@
-23 January 2014: Beautification
+25 January 2014: Code cleanup, generic views
 
-Today was my relaxation day, so I added some rudimentary style to the page displays. I figured out how to get static files working and used some free style sheets.  I fixed the model displays in doing so.  Screenshots are in /media/RDb/.
+I am working on converting the old views to generic views, after realizing those exist.  I have ResourceDetailView and ResourceListView done and back to the appearance of the old, handwritten version.  Luckily, I saved the code from the old views, and was able to get the ResourceListView to display the list in lettered bins without any trouble.  I also used GREP to ensure there are no hard-coded absolute paths anywhere in the project, and moved some files around to more proper locations.
 
-# On branch master
-# Changes to be committed:
-#   (use "git reset HEAD <file>..." to unstage)
-#
-#	modified:   NatEcon/settings.py
-#	modified:   NatEcon/urls.py
-#	modified:   RDb/models.py
-#	new file:   RDb/settings.py
-#	modified:   RDb/urls.py
-#	modified:   RDb/views.py
-#	modified:   Templates/RDb/resource.html
-#	modified:   Templates/RDb/surveyvalue.html
-#	modified:   Templates/resource_list.html
-#	new file:   media/RDb/2014-01-23-210947_1024x600_scrot.png
-#	new file:   media/RDb/2014-01-23-211018_1024x600_scrot.png
-#	new file:   media/RDb/2014-01-23-214431_1024x600_scrot.png
-#	new file:   media/RDb/index.html
-#	new file:   media/RDb/menu.css
-#	new file:   media/RDb/menu_jquery.js
-#	new file:   media/RDb/styles.css
-#	new file:   media/RDb/surveys.css
-#	new file:   media/RDb/wide_menu.css
-#
-# Changes not staged for commit:
-#   (use "git add/rm <file>..." to update what will be committed)
-#   (use "git checkout -- <file>..." to discard changes in working directory)
-#
-#	deleted:    2014-01-18-115135_1024x600_scrot.png
-#	deleted:    2014-01-22-225754_1024x600_scrot.png
-#	deleted:    Initial-Data/CSV/.~lock.nem.csv#
-#	deleted:    Media/test-graph.png
-#	deleted:    Templates/menu.css
-#	deleted:    Templates/menu.gif
-#	modified:   commit_msg.txt
-#	deleted:    menu51/index.html
-#

@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -23,7 +23,7 @@ SECRET_KEY = 'lu3o8hu813j-=ieren!1&jz4+9f09^&th&bck16-9m&ta#cjcu'
 DEBUG = True
 
 TEMPLATE_DIRS = (
-    '/home/acumen/Documents/Sage/NatEcon/Templates', # Change this to your own directory.
+    os.path.join(ROOT_PATH,'Templates'), # Change this to your own directory.
 )
 
 TEMPLATE_DEBUG = True
@@ -31,7 +31,7 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 FIXTURE_DIRS = (
-    '/home/acumen/Documents/Sage/NatEcon/Initial-Data/',
+    os.path.join(ROOT_PATH,'Initial-Data'),
 )
 # Application definition
 
@@ -86,7 +86,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
+
 STATICFILES_DIRS = (
     os.path.abspath(os.path.join(ROOT_PATH, 'static')),
 )

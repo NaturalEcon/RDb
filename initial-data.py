@@ -10,8 +10,9 @@ Created on Fri Jan 10 16:58:20 2014
 
 @author: acumen
 """
+ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
 class json_generator():
-    directory = '/home/acumen/Documents/Sage/NatEcon/Initial-Data/'
+    directory = os.path.join(ROOT_PATH,'Initial-Data/')
     csv_dir = 'CSV/'
     json_dir = 'JSON/'
     # 'nesi.csv'
