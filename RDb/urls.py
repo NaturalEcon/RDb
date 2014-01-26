@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from RDb.views import ResourceListView, ResourceDetailView, ActorListView,ActorDetailView,\
-    ProcessListView,ProcessDetailView, index
+    ProcessListView,ProcessDetailView, SurveyDetailView, SurveyInfoDetailView, index
 from django.contrib import admin
 #from django.conf import settings
 #from django.conf.urls.static import static
@@ -18,8 +18,8 @@ urlpatterns = patterns('',
     url(r'^resource/(?P<pk>%s)/$' % uuid_re, ResourceDetailView.as_view(), name='resource'),
     url(r'^details/(?P<pk>\d+)/$', ActorDetailView.as_view(), name='actor'),
     url(r'^process/(?P<pk>\d+)/$', ProcessDetailView.as_view(), name='process'),
-#    url(r'^surveyvalue/(?P<sv_id>\d+)/$', nesurveyvalue, name='surveyvalue'),
-#    url(r'^surveyinfo/(?P<si_id>\d+)/$', nesurveyinfo, name='surveyinfo'),
+    url(r'^surveyvalue/(?P<pk>\d+)/$', SurveyDetailView.as_view(), name='surveyvalue'),
+    url(r'^surveyinfo/(?P<pk>\d+)/$', SurveyInfoDetailView.as_view(), name='surveyinfo'),
 #    url(r'^collection/(?P<necollection_id>\d+)/$', views.necollection, name='collection'),
 #    url(r'^dependency/(?P<nedependency_id>\d+)/$', views.nedependency, name='dependency'),
 ) 

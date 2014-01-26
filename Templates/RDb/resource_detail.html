@@ -8,7 +8,7 @@
 </head>
 
 <body>
-	<h2>{% block title %}{{ object.name|default:"Unnamed resource" }} ({{ object.short_name }}){% endblock %}</h2>
+	<h2>{% block title %}{{ object.name|default:"Unnamed resource" }} ({{ object.short_name|default:"No short name" }}){% endblock %}</h2>
 	<div id="sidebar">
 		{% block sidebar %} 
 			{% block img %}
@@ -22,42 +22,33 @@
 		<li class='has-sub'><a><span>Survey Data</span></a>
 			<ul>
 			{% for survey in survey_data %}
-				<li><a href="/RDb/surveyvalue/{{ survey.id }}/"><span>{{ survey|default:"No properties for this resource." }}</span></a></li>
+				<li><a href="/RDb/surveyvalue/{{ survey.pk }}/"><span>{{ survey|default:"No properties for this resource." }}</span></a></li>
 			{% endfor %}
 			</ul>
 		</li>
 		<li class='has-sub'><a><span>Survey Info</span></a>
 			<ul>
 			{% for survey in survey_info %}
-				<li><a href="/RDb/surveyinfo/{{ survey.id }}/"><span>{{ survey|default:"No properties for this resource." }}</span></a></li>
+				<li><a href="/RDb/surveyinfo/{{ survey.pk }}/"><span>{{ survey|default:"No properties for this resource." }}</span></a></li>
 			{% endfor %}
 			</ul>
 		</li>
 		<li class='has-sub'><a><span>Properties</span></a>
 			<ul>
 			{% for property in properties %}
-				<li><a href="/RDb/property/{{ property.id }}/"><span>{{ property|default:"No properties for this resource." }}</span></a></li>
+				<li><a href="/RDb/property/{{ property.pk }}/"><span>{{ property|default:"No properties for this resource." }}</span></a></li>
 			{% endfor %}
 			</ul>
 		</li>
 		<li class='has-sub'><a><span>Dependencies</span></a>
 			<ul>
 			{% for dependency in dependencies %}
-				<li><a href="/RDb/dependency/{{ dependency.id }}/"><span>{{ dependency|default:"No properties for this resource." }}</span></a></li>
+				<li><a href="/RDb/dependency/{{ dependency.pk }}/"><span>{{ dependency|default:"No properties for this resource." }}</span></a></li>
 			{% endfor %}
 			</ul>
 		</li>
 		{% endblock content %}
 	</ul>
 	</div>
-	
-	
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-<script type="text/javascript">
-$('#menu > a').click(function(){
-    $(this).next().next().slideToggle();
-    return false;
-});
-</script>
 </body>
 

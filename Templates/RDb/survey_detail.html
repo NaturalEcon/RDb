@@ -20,17 +20,17 @@
 			<div id="info">
 				<p>{{ survey.description|default:"There is no description for this survey data." }}</p>
 			</div>
-			<div id="form"><form method="post" action="{% url 'RDb:edit_description' survey.id %}">
+<!--		<div id="form"><form method="post" action="{#% url 'RDb:edit_description' survey.id %#}">
 				<textarea name="description" cols="40" rows="5">
 					{{ survey.description }}
 				</textarea><br>
 				<input type="submit" value="Submit" />
 				</form>
 			</div>
-			
+-->			
 		<li><a>Data:</a></li>
-			<div id="info">{{ about_string }} {{ about|lower }}: 
-				<p>{{ dd_string }}</p>
+			<div id="info">{{ about_string }} {{ about|lower }}, 
+				<p>{{ datadesc }}</p>
 				<p>{{ value }}</p>
 			</div>
 			<div id="form"><form method="post" action="">

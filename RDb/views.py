@@ -25,17 +25,17 @@ class ResourceDetailView(DetailView):
     properties  = None
     dependencies= None
     
-    def get_qs(self):
-        self.qs = super(ResourceDetailView, self).get_queryset()
-        self.survey_data =  NESurveyValue.objects.filter(resource__exact=self.qs.first())
-        self.survey_info =  NESurveyInfo.objects.filter(resource__exact=self.qs.first())
+    def get_obj(self):
+        self.obj = super(ResourceDetailView, self).get_object()
+        self.survey_data =  NESurveyValue.objects.filter(resource__exact=self.obj).all()
+        self.survey_info =  NESurveyInfo.objects.filter(resource__exact=self.obj).all()
         self.properties =   NEProperty.objects.first()#filter(resource__exact=ner_uuid)
-        self.dependencies = NEDependency.objects.filter(parent_resource__exact=self.qs.first())        
+        self.dependencies = NEDependency.objects.filter(parent_resource__exact=self.obj).all()
         
         
     def get_context_data(self, **kwargs):
-        self.get_qs()
         context = super(ResourceDetailView, self).get_context_data(**kwargs)
+        self.get_obj()
         context['survey_data'] = self.survey_data
         context['survey_info'] = self.survey_info
         context['properties'] = self.properties
@@ -45,17 +45,56 @@ class ResourceDetailView(DetailView):
 class ActorDetailView(DetailView):
     model = NEActor
     template_name = 'RDb/actor_detail.html'
-    def get_context_data(self, **kwargs):
-        context = super(ActorDetailView, self).get_context_data(**kwargs)
-        return context
    
 class ProcessDetailView(DetailView):
     model = NEProcess
     template_name = 'RDb/process_detail.html'
-    def get_context_data(self, **kwargs):
-        context = super(ProcessDetailView, self).get_context_data(**kwargs)
-        return context
    
+class SurveyDetailView(DetailView):
+    model = NESurveyValue
+    template_name = 'RDb/survey_detail.html'
+
+class SurveyInfoDetailView(DetailView):
+    model = NESurveyInfo
+    template_name = 'RDb/survey_detail.html'
+    
+    def format_object(self):
+        survey = super(SurveyInfoDetailView, self).get_object()        
+        about = None
+        about_string = ''
+        if survey.resource is not None:
+            about_string = 'Resource'
+            about = survey.resource
+        if survey.actor is not None:
+            about_string = 'Actor'
+            about = survey.actor
+        if survey.process is not None:
+            about_string = 'Process'
+            about = survey.process                
+        citation = survey.record
+        cmid = "%s, %s." % (citation.author,citation.date)
+        cend = ''
+        value = ' %5.2f%s' % (survey.value,survey.unit)
+        data_description = '%s on %s from %s:' % (survey.get_valuetype_display().capitalize(),survey.startdate,survey.location)
+        if citation.doi is not '':
+            cend = "%s" % citation.doi
+        if citation.isbn is not '':
+            cend = "%s" % citation.isbn
+        return {'ctitle':citation.title,'cmid':cmid,'cend':cend,'datadesc':data_description,
+                'value': value,'about_string':about_string,'about':about}
+    
+    def get_context_data(self, **kwargs):
+        context = super(SurveyInfoDetailView, self).get_context_data(**kwargs)
+        args = self.format_object()
+        context['datadesc'] = args['datadesc']
+        context['value'] = args['value']
+        context['ctitle'] = args['ctitle']
+        context['cmid'] = args['cmid']
+        context['cend'] = args['cend']
+        context['about'] = args['about']
+        context['about_string'] = args['about_string']
+        return context
+
 class ResourceListView(ListView):
     model = NEResource
     template_name = 'RDb/resource_list.html'
@@ -94,14 +133,14 @@ class ResourceListView(ListView):
 class ActorListView(ListView):
     model = NEActor
     template_name = 'RDb/actor_detail.html'
-    def get_context_data(self, **kwargs):
-        context = super(ActorListView, self).get_context_data(**kwargs)
-        
-        return context
    
 class ProcessListView(ListView):
     model = NEProcess
     template_name = 'RDb/process_detail.html'
-    def get_context_data(self, **kwargs):
-        return context
    
+class SurveyListView(ListView):
+    model = NESurveyValue
+    template_name = 'RDb/survey_detail.html'
+
+class SurveyInfoListView(SurveyListView):
+    model = NESurveyInfo

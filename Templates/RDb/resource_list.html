@@ -12,7 +12,7 @@
    <li class='has-sub'><a><span>{{ item.a }}</span></a>
       <ul>
 		 {% for resource in item.b %}
-         <li><a href='/RDb/resource/{{ object.rid }}/'><span>{{ resource.name }}</span></a></li>
+         <li><a href='/RDb/resource/{{ resource.pk }}/'><span>{{ resource.name }}</span></a></li>
          {% endfor %}
       </ul>
    </li>
