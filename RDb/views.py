@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.views.generic.edit import FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
+from django.forms import ModelForm
 
 
 def index(request):
@@ -17,6 +18,7 @@ def index(request):
     return HttpResponse(template.render(context))
 
 class ResourceDetailView(DetailView):
+    """ResourceDetailView: The detail view for NEResource."""
     model = NEResource
     template_name = 'RDb/resource_detail.html'
     qs = None
@@ -43,18 +45,22 @@ class ResourceDetailView(DetailView):
         return context
         
 class ActorDetailView(DetailView):
+    """ActorDetailView: The detail view for NEActor."""
     model = NEActor
     template_name = 'RDb/actor_detail.html'
    
 class ProcessDetailView(DetailView):
+    """ProcessDetailView: The detail view for NEProcess."""
     model = NEProcess
     template_name = 'RDb/process_detail.html'
    
-class SurveyDetailView(DetailView):
+class SurveyValueDetailView(DetailView):
+    """SurveyValueDetailView: The detail view for NESurveyValue."""
     model = NESurveyValue
     template_name = 'RDb/survey_detail.html'
 
 class SurveyInfoDetailView(DetailView):
+    """SurveyInfoDetailView: The detail view for NESurveyInfo."""
     model = NESurveyInfo
     template_name = 'RDb/survey_detail.html'
     
@@ -75,7 +81,7 @@ class SurveyInfoDetailView(DetailView):
         cmid = "%s, %s." % (citation.author,citation.date)
         cend = ''
         value = ' %5.2f%s' % (survey.value,survey.unit)
-        data_description = '%s on %s from %s:' % (survey.get_valuetype_display().capitalize(),survey.startdate,survey.location)
+        data_description = '%s on %s from %s:' % (survey.get_valuetype_display().capitalize(),survey.startdate,survey.source)
         if citation.doi is not '':
             cend = "%s" % citation.doi
         if citation.isbn is not '':
@@ -96,6 +102,7 @@ class SurveyInfoDetailView(DetailView):
         return context
 
 class ResourceListView(ListView):
+    """ResourceListView: The list view for NEResource."""
     model = NEResource
     template_name = 'RDb/resource_list.html'
     
@@ -131,16 +138,20 @@ class ResourceListView(ListView):
         return context
    
 class ActorListView(ListView):
+    """ActorListView: The list view for NEActor."""
     model = NEActor
     template_name = 'RDb/actor_detail.html'
    
 class ProcessListView(ListView):
+    """ProcessListView: The list view for NEProcess."""
     model = NEProcess
     template_name = 'RDb/process_detail.html'
    
-class SurveyListView(ListView):
+class SurveyValueListView(ListView):
+    """SurveyValueListView: The list view for NESurveyValue."""
     model = NESurveyValue
     template_name = 'RDb/survey_detail.html'
 
 class SurveyInfoListView(SurveyListView):
+    """SurveyInfoListView: The list view for NESurveyInfo."""
     model = NESurveyInfo

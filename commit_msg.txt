@@ -1,30 +1,4 @@
-26 January 2014: Code cleanup, generic views
+31 January 2014: Documentation, new models.
 
-Continued my work from yesterday: Cleaned up cruft in my code, and made the views more properly class-based.  I have NESurveyInfo back to where it was.  I will soon be attempting to implement inline updating of detail views.
+I'm going to be splitting RDb into descriptive and operational portions.  I've defined some of the operational models as well as improving the descriptive models and documentation.
 
-# On branch master
-# Changes to be committed:
-#   (use "git reset HEAD <file>..." to unstage)
-#
-#	modified:   .gitignore
-#	modified:   RDb/urls.py
-#	modified:   RDb/views.py
-#	modified:   Templates/RDb/resource_detail.html
-#	modified:   Templates/RDb/resource_list.html
-#	new file:   Templates/RDb/survey_detail.html
-#	modified:   commit_msg.txt
-#	new file:   loaddata.sh
-#
-# Changes not staged for commit:
-#   (use "git add/rm <file>..." to update what will be committed)
-#   (use "git checkout -- <file>..." to discard changes in working directory)
-#
-#	deleted:    Initial-Data/elements-uids.txt
-#	deleted:    Initial-Data/nec.csv
-#	deleted:    Initial-Data/pks.txt
-#	deleted:    RDb/oldurls.py
-#	deleted:    RDb/oldviews.py
-#	deleted:    Templates/RDb/surveyvalue.html
-#	deleted:    loaddata.py
-#	deleted:    ptable.py
-#
