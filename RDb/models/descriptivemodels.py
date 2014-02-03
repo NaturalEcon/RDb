@@ -1,79 +1,23 @@
 from django.db import models
 from commonmodels import *
+from basemodels import *
 from django.forms import ModelForm
 from managers import *
-
+from types import infotypes
 """
 NE Descriptive Models:
 Django model and form classes for the descriptive half of RDb.
 Created on Tue Jan  7 12:55:59 2014
 
 :author: acumen
-:attr ctypes: Types of sources that can be cited.
 """
-ctypes = (
-    ('J','Journal article'),('R','Report'),('P','Personal communication'),
-    ('B','Book'),('M','Memo')
-)
 
-class NEResource(DESCRIPTION,NEOBJECT):
-    """
-    NEResource: NEOBJECT for materials and energy.
-    :param dependencies: A many-to-many field for the resources this one is composed of or depend on to exist.
-    :param subclasses: A many-to-many field for the resources that are more specialized cases of this one.
-    """
-    dependencies = models.ManyToManyField('NEResource', related_name='fdeps',related_query_name='fdep', 
-                                          through='NEDependency', symmetrical=False)
-    subclasses   = models.ManyToManyField('NEResource', related_name='superclasses', related_query_name='superclass', 
-                                          through='NESubclass', symmetrical=False)
-    
-    class Meta:
-        verbose_name = 'Resource'
-    
-    def __repr__(self):
-        return self.name
-    def __unicode__(self):
-        return self.__repr__()
+#class ResourceForm(ModelForm):
+#    class Meta:
+#        model = NEResource
+#        fields = ['name', 'short_name', 'long_name','description']
 
-class ResourceForm(ModelForm):
-    class Meta:
-        model = NEResource
-        fields = ['name', 'short_name', 'long_name','description']
-
-
-class NEActor(NEOBJECT,DESCRIPTION):
-    """
-    NEActor: An NEOBJECT representing active systems, organisms, or other complexes with agency (externally).
-    :param children: A many-to-many field for the children of this actor.
-    :param atype: The type of actor that this is.  See the common models for the choices.
-    """
-    children = models.ManyToManyField('NEActor',related_name='actor_parents',blank=True,null=True)
-    atype = models.CharField(max_length=3,choices=atypes)
-
-    class Meta:
-        verbose_name = 'Actor'
-
-
-class NEProcess(NEOBJECT,DESCRIPTION):
-    """
-    NEProcess: An NEOBJECT representing an interaction that results in a change from one set of NEOBJECTS to another.
-    :param ptype: The type of process this is.  See the common models for the choices.
-    :param io: A many-to-many field for the inputs and outputs of this process.
-    """
-    ptype = models.CharField(max_length=2,choices=ptypes,verbose_name='Process type')
-    
-    io = models.ManyToManyField( NEResource,through='NEProcessIO',symmetrical=False,
-                                verbose_name='Inputs/Outputs',related_name='relevant_processes')
-     
-    class Meta:
-        verbose_name = 'Process'
-        verbose_name_plural = 'Processes'
-
-    def __repr__(self):
-        return "%s (Type %s)\n Inputs: %s \n Outputs: %s" % (self.pname,self.get_ptype_display(),self.inputs,self.outputs)
-
-
-class NEProcessIO(DESCRIPTION,ABOUT,VALUE):
+class NEProcessIO(ABOUT,VALUE):
     """
     NEProcessIO: Adjacency table for NEProcesses.
     :param arg_type: The type of entry on this row (Inputs and outputs occupy separate rows).
@@ -85,11 +29,28 @@ class NEProcessIO(DESCRIPTION,ABOUT,VALUE):
     class Meta:
         verbose_name = 'Process IO'
         verbose_name_plural = 'Process IO'
+        app_label='RDb'
+        db_table = 'RDb_neprocessio'
     
     def __repr__(self):
-        return '%s: %f x %s' % (self.name,self.arg_weight,self.resource.name)
+        return '%s: %f x %s' % (self.name,self.value,self.resource.name)
+        
     def __unicode__(self):
         return self.__repr__()
+
+
+class NECapital(ABOUT):
+    """
+    NECapital: An adjancency table that associates NEProcesses with NEResources.
+    :param resource: The capital resource associated with the process.
+    :param process: The process enabled by this capital.
+    """
+    
+    class Meta:
+        verbose_name = 'Capital'
+        verbose_name_plural = 'Capitals'
+        app_label='RDb'
+        db_table = 'RDb_necapital'
 
 
 class NEProperty(DESCRIPTION,ABOUT,VALUE):
@@ -98,23 +59,33 @@ class NEProperty(DESCRIPTION,ABOUT,VALUE):
     :param error: The error range of the property.
     :type error: An up to 64-character string.
     """
+    valuetype = None
     error = models.CharField(max_length=64,blank=True,null=True)
+    effects = models.ManyToManyField('NEProperty',through='NEEffect',
+                                     related_name='affected_by',symmetrical=False)
     
     class Meta:
         verbose_name = 'Property'
         verbose_name_plural = 'Properties'
+        app_label='RDb'
+        db_table = 'RDb_neproperty'
         
 
-class NEAffectation(DESCRIPTION,VALUE):
+class NEEffect(DESCRIPTION,VALUE):
     """
-    NEAffectation: Describes the interaction of properties.
+    NEEffect: Describes the interaction of properties.
     :param sub: The subject property in the relationship, or 'A' in 'A affects B'.
     :param obj: The object property in the relationship, or 'B' in 'A affects B'.
     """
-    sub = models.ForeignKey(NEProperty)
+    subject_property = models.ForeignKey(NEProperty,related_name='obj_property')
     # affects:
-    obj = models.ForeignKey(NEProperty)
+    object_property = models.ForeignKey(NEProperty,related_name='subj_property')
     # (by VALUE)
+    
+    class Meta:
+        verbose_name = 'Affectation'
+        app_label='RDb'
+        db_table = 'RDb_neaffectation'
     
     def __repr__(self):
         return "%s affects %s by %5.2f %s per %s" % (self.primary,self.secondary,self.value,self.primary.unit,self.secondary.unit)
@@ -122,19 +93,21 @@ class NEAffectation(DESCRIPTION,VALUE):
         return self.__repr__()
 
 
-class NECollection(NEOBJECT,ABOUT,DESCRIPTION):
+class NECollectionMembers(ABOUT):
     """
-    NECollection: A group of heterogeneous NEOBJECTS.
-    :param collection_id: The idea of the collection.  Separate from the primary key.
+    NECollectionMembers: The adjacency table for NECollections
+    :param cid: The primary key of the parent collection.
     """
-    collection_id = models.IntegerField(verbose_name='Collection ID')
+    cid = models.ForeignKey('NECollection',related_name='collection_members')
     
     class Meta:
-        verbose_name= 'Collection'
-        verbose_name_plural = 'Collections'
+        verbose_name= 'Collection Member'
+        verbose_name_plural = 'Collection Members'
+        app_label='RDb'
+        db_table = 'RDb_necollectionmembers'
         
     def __repr__(self):
-        output = '#%i:' % self.collection_id
+        output = '#%i:' % self.cid
         if self.resource is not None:
             output += ' %s ' % self.resource
         if self.process is not None:
@@ -147,83 +120,30 @@ class NECollection(NEOBJECT,ABOUT,DESCRIPTION):
         return self.__repr__()
 
 
-   
+
 class NEDependency(DESCRIPTION,VALUE):
     """
     NEDependency: An ajacency map for the composition non-trivial NEResources.
     :param parent_resource: The subject of this dependency.
     :param dependency: The object for this dependency.
     """
-    parent_resource = models.ForeignKey(NEResource,related_name='backward_dependencies',
+    parent_resource = models.ForeignKey('NEResource',related_name='backward_dependencies',
                                         related_query_name='backward_dependency')
-    dependency = models.ForeignKey(NEResource,related_name='forward_dependencies',
+    dependency = models.ForeignKey('NEResource',related_name='forward_dependencies',
                                         related_query_name='forward_dependency')
     
     class Meta:
         verbose_name = 'Dependency'
         verbose_name_plural = 'Dependencies'
         unique_together = (('parent_resource','dependency'),)
+        app_label='RDb'
+        db_table = 'RDb_nedependency'
     
     def __repr__(self):
         return "%s requires %5.2f x %s" % (self.parent_resource,self.dependency_mult,self.dependency)
     def __unicode__(self):
         return self.__repr__()
 
-
-class NESubclass(DESCRIPTION):
-    """
-    NESubclass: Qualitative subgroup of NEResources.
-    :param parent_class: The superclass in the relationship.
-    :param child_class: The subclass in the relationship.
-    """
-    parent_class = models.ForeignKey(NEResource,related_name='parent_classes',
-                                     related_query_name='parent_class')
-    
-    child_class = models.ForeignKey(NEResource,related_name='child_classes',
-                                     related_query_name='child_class')
-    
-    class Meta:
-        verbose_name = 'Subclass'
-        verbose_name_plural = 'Subclasses'
-    
-    def __repr__(self):
-        return 'Superclass: %s\nSubclass: %s' % (self.parent_class,self.child_class)
-        
-       
-class NECitation(models.Model):
-    """
-    NECitation: A rudimentary citation data structure.
-    :param title: The title of the cited work.
-    :param author: The author of the cited work.
-    :param date: The date on which the work was published.
-    :param doi: The Document Object Identifier (DOI) for the work (optional).
-    :param isbn: The International Standard Book Number (ISBN) for the work (optional).
-    :param ctype: The type of work being cited.
-    """
-    title = models.CharField(max_length=100)
-    author = models.CharField(max_length=50,blank=True,default='Unknown Author')
-    date = models.DateField(blank=True,auto_now_add=True)
-    doi = models.CharField(max_length=30,blank=True,default='',verbose_name='DOI')
-    isbn = models.CharField(max_length=13,blank=True,default='',verbose_name='ISBN')
-    ctype = models.CharField(max_length=1,choices=ctypes,verbose_name='Citation type')
-    
-    objects = models.Manager()
-    dataframe = DataFrameManager()    
-    
-    class Meta:
-        verbose_name = 'Citation'
-    
-    def __repr__(self):
-        output = ""
-        if self.title is not None: output += self.title + ""
-        if self.author is not None: 
-            output += self.author + "."
-        if self.doi is not None: output += self.doi + " "
-        return output
-
-    def __unicode__(self):
-        return self.__repr__()        
-        
         
 class NESurvey(ABOUT,VALUE,DESCRIPTION):
     """
@@ -243,6 +163,7 @@ class NESurvey(ABOUT,VALUE,DESCRIPTION):
 
     class Meta:
         abstract=True
+        app_label='RDb'
 
 
 class NESurveyValue(NESurvey):
@@ -252,10 +173,12 @@ class NESurveyValue(NESurvey):
     :param reference: Where the datum came from.
     """
     date = models.DateField(auto_now_add=True,blank=True,null=True)
-    reference = models.ForeignKey(NECitation,verbose_name='Citation')
+    reference = models.ForeignKey('NECitation',verbose_name='Citation',null=True,blank=True)
     
     class Meta:
         verbose_name = 'Survey Value'
+        app_label='RDb'
+        db_table = 'RDb_nesurveyvalue'
         
     def __repr__(self):
         output = ''
@@ -272,7 +195,7 @@ class NESurveyValue(NESurvey):
         return self.__repr__()
    
 
-class NESurveyInfo(models.Model):
+class NESurveyInfo(NESurvey):
     """
     NESurveyInfo: A survey entry that incorporates multiple data points, such as a meta-study, forecast, or statistical analysis.
     :param infotype: The type of collection of data.  Choices can be found in commonmodels.
@@ -289,7 +212,9 @@ class NESurveyInfo(models.Model):
                                      related_name='cited_by',symmetrical=True)    
     class Meta:
         verbose_name = 'Survey Info'
-        verbose_name_plural = 'Survey Info'    
+        verbose_name_plural = 'Survey Info' 
+        app_label='RDb'
+        db_table = 'RDb_nesurveyinfo'
     
     def __repr__(self):
         output = ''
@@ -312,10 +237,15 @@ class NESurveyInfo(models.Model):
         return self.__repr__()
 
 
-class NEInfoCitation(models.Model):
-    description = models.TextField(blank=True,default='')
-    iid = models.ForeignKey(NESurveyInfo,related_name='info_citation')
-    cid = models.ForeignKey(NECitation,related_name='meta_study')
+class NEInfoCitation(ABOUT):
+    """
+    NEInfoCitation: A collection of NECitations for NESurveyInfo.
+    :param iid: The NESurveyInfo entry this item is associated with.
+    :param cid: An NECitation in the collection for IID.
+    """
+    iid = models.ForeignKey(NESurveyInfo,related_name='survey_info')
+    cid = models.ForeignKey('NECitation',related_name='citation')
     class Meta:
         verbose_name = 'Info Citation'
-        
+        app_label='RDb'
+        db_table = 'RDb_neinfocitation'

@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from RDb.descriptivemodels import *
+from commonmodels import *
+from basemodels import *
+from descriptivemodels import *
 from django.template import RequestContext, loader
 from django.http import HttpResponse
 from django.views.generic.edit import FormView
@@ -43,6 +45,9 @@ class ResourceDetailView(DetailView):
         context['properties'] = self.properties
         context['dependencies'] = self.dependencies
         return context
+
+class NEOBJECTDetailView(DetailView):
+    model = NEOBJECT
         
 class ActorDetailView(DetailView):
     """ActorDetailView: The detail view for NEActor."""
@@ -54,18 +59,14 @@ class ProcessDetailView(DetailView):
     model = NEProcess
     template_name = 'RDb/process_detail.html'
    
-class SurveyValueDetailView(DetailView):
-    """SurveyValueDetailView: The detail view for NESurveyValue."""
-    model = NESurveyValue
-    template_name = 'RDb/survey_detail.html'
 
-class SurveyInfoDetailView(DetailView):
-    """SurveyInfoDetailView: The detail view for NESurveyInfo."""
-    model = NESurveyInfo
+class SurveyDetailView(DetailView):
+    """SurveyDetailView: The detail view for NESurvey."""
+    model = NESurvey
     template_name = 'RDb/survey_detail.html'
     
     def format_object(self):
-        survey = super(SurveyInfoDetailView, self).get_object()        
+        survey = super(SurveyDetailView, self).get_object()        
         about = None
         about_string = ''
         if survey.resource is not None:
@@ -100,6 +101,17 @@ class SurveyInfoDetailView(DetailView):
         context['about'] = args['about']
         context['about_string'] = args['about_string']
         return context
+
+        
+class SurveyValueDetailView(SurveyDetailView):
+    """SurveyValueDetailView: The detail view for NESurveyValue."""
+    model = NESurveyValue
+    
+    
+class SurveyInfoDetailView(SurveyDetailView):
+    """SurveyInfoDetailView: The detail view for NESurveyInfo."""
+    model = NESurveyInfo
+    
 
 class ResourceListView(ListView):
     """ResourceListView: The list view for NEResource."""

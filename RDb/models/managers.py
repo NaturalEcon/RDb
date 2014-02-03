@@ -4,6 +4,7 @@ import pandas as pd
 from django.db import models
 from model_utils.managers import PassThroughManager
 """
+managers.py: Django managers module.
 Created on Wed Jan  8 22:43:33 2014
 
 @author: acumen, chrisdev
@@ -141,7 +142,7 @@ class DataFrameQuerySet(QuerySet):
         """
         Returns a DataFrame from the queryset
         
-        Paramaters
+        Parameters
         -----------
         
         fields: The model fields to utilise in creating the frame.
@@ -149,14 +150,14 @@ class DataFrameQuerySet(QuerySet):
         fields across models, separated by double underscores,
         
         
-        index: Specify the field to use for the index. If the index
+        :param index: Specify the field to use for the index. If the index
         field is not in the field list it will be appended
         
-        fill_na: Fill in missing observations using one of the following
+        :param fill_na: Fill in missing observations using one of the following
         this is a string specifying a pandas fill method
         {'backfill, 'bill', 'pad', 'ffill'} or a scalar value
         
-        coerce_float: Attempt to convert the numeric non-string fields
+        :param coerce_float: Attempt to convert the numeric non-string fields
         like object, decimal etc. to float if possible
         """
         index = kwargs.pop('index', None)
@@ -190,19 +191,26 @@ class DataFrameQuerySet(QuerySet):
 class DataFrameManager(PassThroughManager):
     def get_query_set(self):
         return DataFrameQuerySet(self.model)
+
+
+class ABOUTManager(models.Manager):
+    """ABOUTManager: A manager for models based on the ABOUT abstract class."""
+    
+    def resources(self):
+        return super(ABOUTManager, self).get_queryset().exclude(resource__exact=None)
         
+    def collections(self):
+        return super(ABOUTManager, self).get_queryset().exclude(collection__exact=None)
+        
+    def processes(self):
+        return super(ABOUTManager, self).get_queryset().exclude(process__exact=None)
+        
+    def actors(self):
+        return super(ABOUTManager, self).get_queryset().exclude(actor__exact=None)
+
 class ResourceSurveyManager(models.Manager):
-    def get_queryset(self):
-        return super(ResourceSurveyManager, self).get_queryset().exclude(resource__exact=None)
-
-class CollectionSurveyManager(models.Manager):
-    def get_queryset(self):
-        return super(CollectionSurveyManager, self).get_queryset().exclude(collection__exact=None)
-
-class ProcessSurveyManager(models.Manager):
-    def get_queryset(self):
-        return super(ProcessSurveyManager, self).get_queryset().exclude(process__exact=None)
+    def get_query_set(self):
+        return super(ABOUTManager, self).get_queryset().filter(resource__neid=self.neid)
         
-class ActorSurveyManager(models.Manager):
-    def get_queryset(self):
-        return super(ActorSurveyManager, self).get_queryset().exclude(actor__exact=None)
+    def by_value_type(self,value_type):
+        return self.surveys.filter(value_type__exact=value_type)

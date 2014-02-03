@@ -1,7 +1,8 @@
 import json
 import csv
+import os
 """
-ICE.py
+initial-data.py
 
 Generates a json file of the University of Bath's Inventory of Carbon and Energy
 formatted according to the Natural Economics RDb specification.
@@ -10,20 +11,19 @@ Created on Fri Jan 10 16:58:20 2014
 
 @author: acumen
 """
-ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
+ROOT_PATH = os.path.join(os.path.dirname(__file__), '.')
 class json_generator():
     directory = os.path.join(ROOT_PATH,'Initial-Data/')
     csv_dir = 'CSV/'
     json_dir = 'JSON/'
     # 'nesi.csv'
-    source_files = ('nem.csv',
-                    'ner.csv',
-                    'nep.csv',
-                    'nesc.csv',
+    source_files = ('ner.csv',
+                    'nersc.csv',                   
                     'ned.csv',
                     'nec.csv',
                     'necol.csv',
-                    'nesi.csv'
+                    'necolm.csv',
+                    'nesv.csv'
                     )
     __defaults__ = {'date':'2011-01-01','startdate':'2011-01-01','enddate':'2050-01-01','location':'World','ref':'1',
             'infotype':'u'}
@@ -32,7 +32,7 @@ class json_generator():
                 'nem':'NEResource','ned':'NEDependency','nep':'NEResource','ner':'NEResource',
                 'neprp':'NEProperty','nepro':'NEProcess','nepio':'NEProcessIO','nec':'NECitation',
                 'neicit':'NEInfoCitation','nesv':'NESurveyValue','nesi':'NESurveyInfo',
-                'neac':'NEActor','necol':'NECollection','nesc':'NESubclass'
+                'neac':'NEActor','necol':'NECollection','necolm':'NECollectionMembers','nersc':'NERSubclass'
             }
     __pk__ = { 'NEResource':'rid' }
     # Needs to fix date formatting.
