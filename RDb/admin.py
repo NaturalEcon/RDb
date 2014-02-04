@@ -1,5 +1,6 @@
-from RDb.descriptivemodels import NEResource,NECollection,NEDependency,NESubclass,NEActor
-from RDb.descriptivemodels import NECitation,NEProcess,NEProcessIO,NESurveyValue,NEInfoCitation,NESurveyInfo,NEProperty
+from RDb.models.commonmodels import *
+from RDb.models.basemodels import *
+from RDb.models.descriptivemodels import *
 from django.contrib import admin
 
 # Register your models here.
@@ -14,7 +15,7 @@ class ProcessIOInline(admin.TabularInline):
     model = NEProcessIO
      
 class NESurveyValueAdmin(admin.ModelAdmin):
-    list_display = ('resource','date','valuetype','value','unit','location')
+    list_display = ('resource','date','value_type','value','unit','source')
     #inlines = [CitationInline]
     fk_name = 'resource'
     extra = 1
@@ -22,19 +23,19 @@ class NEResourceAdmin(admin.ModelAdmin):
     list_display = ('name','short_name','description')
     
 class NESurveyInfoAdmin(admin.ModelAdmin):
-    list_display = ('resource','startdate','value','unit','valuetype','location')
+    list_display = ('resource','start_date','value','unit','value_type','source')
    
 class NEProcessAdmin(admin.ModelAdmin):
     list_display = ('name','ptype')
     
-class NESubclassAdmin(admin.ModelAdmin):
+class NERSubclassAdmin(admin.ModelAdmin):
     list_display = ('parent_class','child_class')
     
 class NECollectionAdmin(admin.ModelAdmin):
-    list_display = ('collection_name','resource','actor','process')    
+    list_display = ('name','description')    
     
 admin.site.register(NEResource,NEResourceAdmin)
-admin.site.register(NESubclass,NESubclassAdmin)
+admin.site.register(NERSubclass,NERSubclassAdmin)
 admin.site.register(NECollection,NECollectionAdmin)
 admin.site.register(NEDependency)
 admin.site.register(NEActor)

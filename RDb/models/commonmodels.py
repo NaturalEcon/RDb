@@ -21,6 +21,7 @@ class NEOBJECT(models.Model):
     :type dataframe: DataFrameManager
     """
     neid = models.CharField(max_length=40,primary_key=True)
+    objects = models.Manager()
     dataframe = DataFrameManager()
 
     class Meta:

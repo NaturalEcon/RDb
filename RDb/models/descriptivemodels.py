@@ -1,7 +1,6 @@
 from django.db import models
 from commonmodels import *
 from basemodels import *
-from django.forms import ModelForm
 from managers import *
 from types import infotypes
 """
@@ -99,6 +98,7 @@ class NECollectionMembers(ABOUT):
     :param cid: The primary key of the parent collection.
     """
     cid = models.ForeignKey('NECollection',related_name='collection_members')
+    objects = ABOUTManager()    
     
     class Meta:
         verbose_name= 'Collection Member'
